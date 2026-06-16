@@ -181,7 +181,8 @@ jobs:
 
 
             terraform plan \
-            -out=tfplan
+            -out=tfplan \
+            -no-color
 
 
 
