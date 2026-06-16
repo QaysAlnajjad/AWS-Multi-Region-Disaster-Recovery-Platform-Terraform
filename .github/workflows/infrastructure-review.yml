@@ -12,7 +12,6 @@ on:
 permissions:
 
   contents: read
-
   id-token: write
 
 
@@ -66,7 +65,6 @@ jobs:
 
 
 
-
       - name: Discover Terraform directories
 
         id: terraform_dirs
@@ -75,20 +73,16 @@ jobs:
 
         run: |
 
-
-          dirs=$(find . \
+          dirs=$(find ./environments \
           -type f \
           -name "*.tf" \
-          -not -path "*/.terraform/*" \
           -exec dirname {} \; \
           | sort -u)
-
 
 
           echo "Terraform directories found:"
 
           echo "$dirs"
-
 
 
           echo "dirs<<EOF" >> $GITHUB_OUTPUT
@@ -99,94 +93,93 @@ jobs:
 
 
 
-          
-          - name: Terraform Validation
-          
-            shell: bash
-          
-            run: |
-          
-          
-              while read dir
-          
-              do
-          
-                echo "================================"
-                echo "Checking: $dir"
-                echo "================================"
-        
-          
-                cd "$dir"
-          
-          
-                terraform fmt -check -recursive
-          
-          
-                terraform init \
-                -backend=false
-          
-          
-                terraform validate -no-color
-          
-          
-                cd - > /dev/null
-          
-          
-              done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
-          
-                - name: Terraform Plan
-          
-                  shell: bash
-          
-                  run: |
-          
-          
-                    mkdir -p ai-results
-          
-          
-          
-                    while read dir
-          
-                    do
-          
-          
-                      name=$(echo "$dir" | tr '/' '_')
-          
-          
-          
-                      echo "Planning: $dir"
-          
-          
-          
-                      cd "$dir"
-          
-          
-          
-                      terraform init
-          
-          
-          
-                      terraform plan \
-                      -out=tfplan \
-                      -no-color
-          
-          
-          
-                      terraform show \
-                      -json tfplan \
-                      > "../ai-results/${name}-terraform-plan.json"
-          
-          
-          
-                      cd - > /dev/null
-          
-          
-          
-                    done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
-          
-          
-        
-        
+
+      - name: Terraform Validation
+
+        shell: bash
+
+        run: |
+
+
+          while read dir
+
+          do
+
+            echo "================================"
+
+            echo "Checking: $dir"
+
+            echo "================================"
+
+
+            cd "$dir"
+
+
+            terraform fmt -check -recursive
+
+
+            terraform init \
+            -backend=false
+
+
+            terraform validate -no-color
+
+
+            cd - > /dev/null
+
+
+          done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
+
+
+
+
+      - name: Terraform Plan
+
+        shell: bash
+
+        run: |
+
+
+          mkdir -p ai-results
+
+
+
+          while read dir
+
+          do
+
+
+            name=$(echo "$dir" | tr '/' '_')
+
+
+            echo "Planning: $dir"
+
+
+            cd "$dir"
+
+
+            terraform init
+
+
+            terraform plan \
+            -out=tfplan \
+            -no-color
+
+
+
+            terraform show \
+            -json tfplan \
+            > "../../ai-results/${name}-terraform-plan.json"
+
+
+
+            cd - > /dev/null
+
+
+          done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
+
+
+
 
       - name: Run tfsec Security Scan
 
@@ -195,10 +188,9 @@ jobs:
         run: |
 
 
-          tfsec . \
+          tfsec ./environments \
           --format json \
           --out ai-results/tfsec-results.json
-
 
 
 
@@ -211,6 +203,4 @@ jobs:
 
           name: infrastructure-review-results
 
-          path:
-
-            ai-results/
+          path: ai-results/
