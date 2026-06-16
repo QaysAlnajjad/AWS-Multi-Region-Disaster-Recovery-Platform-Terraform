@@ -23,11 +23,11 @@ jobs:
 
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform -chdir=environments init 
 
 
       - name: Terraform Validate
-        run: terraform validate
+        run: terraform -chdir=environments validate 
 
 
       - name: Terraform Plan
