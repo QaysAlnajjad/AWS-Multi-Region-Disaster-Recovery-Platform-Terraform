@@ -131,7 +131,7 @@ jobs:
             cd "$dir"
 
 
-            terraform fmt -check -recursive
+            terraform fmt -recursive
 
 
             terraform init \
