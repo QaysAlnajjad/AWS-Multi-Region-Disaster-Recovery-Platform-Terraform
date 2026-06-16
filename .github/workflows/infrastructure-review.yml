@@ -32,7 +32,7 @@ jobs:
 
       - name: Terraform Plan
         run: |
-          terraform plan -out=tfplan
+          terraform chdir=environments plan -out=tfplan
           terraform show -json tfplan > terraform-plan.json
 
 
