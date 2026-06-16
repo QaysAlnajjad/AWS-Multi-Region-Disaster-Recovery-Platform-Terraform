@@ -1,0 +1,48 @@
+name: Infrastructure AI Review
+
+on:
+  workflow_call:
+
+  workflow_dispatch:
+
+
+jobs:
+
+  review:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+
+      - name: Terraform Init
+        run: terraform init
+
+
+      - name: Terraform Validate
+        run: terraform validate
+
+
+      - name: Terraform Plan
+        run: |
+          terraform plan -out=tfplan
+          terraform show -json tfplan > terraform-plan.json
+
+
+      - name: Run tfsec
+        run: |
+          tfsec . \
+          --format json \
+          --out tfsec-results.json
+
+
+      - name: Run AI Review
+        run: |
+          python ai-review-service/client.py

@@ -1,0 +1,28 @@
+project: AWS Multi Region Disaster Recovery Platform
+
+security:
+
+  - No public access to production resources
+
+  - All backup storage must use encryption
+
+  - IAM permissions must follow least privilege
+
+
+availability:
+
+  - Critical services must support disaster recovery
+
+  - Secondary region must be configured
+
+
+cost:
+
+  - Review expensive resources
+
+  - Avoid unnecessary NAT gateways
+
+
+operations:
+
+  - Resources must have proper tagging

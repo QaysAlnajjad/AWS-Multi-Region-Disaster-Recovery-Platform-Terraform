@@ -8,22 +8,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
 
+  review:
+    uses: ./.github/workflows/infrastructure-review.yml
+
+
+  deploy:
+    needs: review
+
+    runs-on: ubuntu-latest
+  
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::174512274809:role/github-actions-terraform-role
+          role-to-assume: arn:aws:iam::<ACCOUNT-ID>:role/github-actions-terraform-role
           aws-region: us-east-1
           role-duration-seconds: 7200
 
+
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
+
 
       - name: Make deployment scripts executable
         run: |
@@ -34,6 +45,7 @@ jobs:
 
       - name: Run Deployment Script
         run: ./scripts/deployment-automation-scripts/deploy.sh
+
 
       - name: Upload errored state if present
         if: failure()
