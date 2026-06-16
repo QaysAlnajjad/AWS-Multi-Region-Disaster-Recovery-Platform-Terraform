@@ -1,48 +1,228 @@
 name: Infrastructure AI Review
 
+
 on:
+
   workflow_call:
 
   workflow_dispatch:
 
 
+
+permissions:
+
+  contents: read
+
+  id-token: write
+
+
+
 jobs:
+
 
   review:
 
+
+    name: Terraform Infrastructure Review
+
     runs-on: ubuntu-latest
+
+
 
     steps:
 
+
       - name: Checkout repository
+
         uses: actions/checkout@v4
 
 
+
+      - name: Configure AWS Credentials
+
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+
+          role-to-assume: arn:aws:iam::<ACCOUNT-ID>:role/github-actions-terraform-role
+
+          aws-region: us-east-1
+
+          role-duration-seconds: 7200
+
+
+
       - name: Setup Terraform
+
         uses: hashicorp/setup-terraform@v3
 
 
-      - name: Terraform Init
-        run: terraform -chdir=environments init 
+
+      - name: Install tfsec
+
+        uses: aquasecurity/setup-tfsec@v1
 
 
-      - name: Terraform Validate
-        run: terraform -chdir=environments validate 
+
+
+
+      - name: Discover Terraform directories
+
+        id: terraform_dirs
+
+        shell: bash
+
+        run: |
+
+
+          dirs=$(find . \
+          -type f \
+          -name "*.tf" \
+          -not -path "*/.terraform/*" \
+          -exec dirname {} \; \
+          | sort -u)
+
+
+
+          echo "Terraform directories found:"
+
+          echo "$dirs"
+
+
+
+          echo "dirs<<EOF" >> $GITHUB_OUTPUT
+
+          echo "$dirs" >> $GITHUB_OUTPUT
+
+          echo "EOF" >> $GITHUB_OUTPUT
+
+
+
+
+
+      - name: Terraform Validation
+
+        shell: bash
+
+        run: |
+
+
+          while read dir
+
+          do
+
+
+            echo "================================"
+
+            echo "Checking: $dir"
+
+            echo "================================"
+
+
+
+            cd "$dir"
+
+
+
+            terraform fmt -check -recursive
+
+
+
+            terraform init \
+            -backend=false
+
+
+
+            terraform validate
+
+
+
+            cd - > /dev/null
+
+
+
+          done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
+
+
+
 
 
       - name: Terraform Plan
+
+        shell: bash
+
         run: |
-          terraform -chdir=environments plan -recursive -out=tfplan
-          terraform show -json tfplan > terraform-plan.json
 
 
-      - name: Run tfsec
+          mkdir -p ai-results
+
+
+
+          while read dir
+
+          do
+
+
+            name=$(echo "$dir" | tr '/' '_')
+
+
+
+            echo "Planning: $dir"
+
+
+
+            cd "$dir"
+
+
+
+            terraform init
+
+
+
+            terraform plan \
+            -out=tfplan
+
+
+
+            terraform show \
+            -json tfplan \
+            > "../ai-results/${name}-terraform-plan.json"
+
+
+
+            cd - > /dev/null
+
+
+
+          done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
+
+
+
+
+
+      - name: Run tfsec Security Scan
+
+        shell: bash
+
         run: |
+
+
           tfsec . \
           --format json \
-          --out tfsec-results.json
+          --out ai-results/tfsec-results.json
 
 
-      - name: Run AI Review
-        run: |
-          python ai-review-service/client.py
+
+
+
+      - name: Upload Infrastructure Review Results
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: infrastructure-review-results
+
+          path:
+
+            ai-results/
