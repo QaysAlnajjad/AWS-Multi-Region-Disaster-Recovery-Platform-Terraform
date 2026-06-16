@@ -56,21 +56,31 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
 
-
       - name: Install Trivy
-
+      
         run: |
       
           sudo apt-get update
       
-          sudo apt-get install -y wget
+          sudo apt-get install -y wget gnupg
       
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.65.0_Linux-64bit.deb
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+          | gpg --dearmor \
+          | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
       
-          sudo dpkg -i trivy_0.65.0_Linux-64bit.deb
-
-
-
+      
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
+          https://aquasecurity.github.io/trivy-repo/deb \
+          generic main" \
+          | sudo tee /etc/apt/sources.list.d/trivy.list
+      
+      
+          sudo apt-get update
+      
+          sudo apt-get install -y trivy
+      
+      
+      
       - name: Discover Terraform directories
 
         id: terraform_dirs
