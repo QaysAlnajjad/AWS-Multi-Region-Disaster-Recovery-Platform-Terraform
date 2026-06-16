@@ -197,16 +197,15 @@ jobs:
 
 
 
-      - name: Run tfsec Security Scan
-
-        shell: bash
+      - name: Run Trivy Terraform Scan
 
         run: |
-
-
-          tfsec ./environments \
-          --format json \
-          --out ai-results/tfsec-results.json
+      
+          mkdir -p ai-results
+      
+          trivy config ./environments \
+            --format json \
+            --output ai-results/trivy-results.json
 
 
 
