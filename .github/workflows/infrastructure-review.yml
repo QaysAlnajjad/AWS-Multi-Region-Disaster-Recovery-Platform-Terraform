@@ -110,73 +110,18 @@ jobs:
             
                 mkdir -p ai-results
             
+
+            - name: Terraform Verify
+
+              run: |
+
+                chmod +x scripts/terraform-verify.sh
+
+                ./scripts/terraform-verify.sh            
             
-                while read dir
+           - name: Run Trivy Terraform Scan
             
-                do
-            
-                  echo "=============================="
-                  echo "Checking: $dir"
-                  echo "=============================="
-            
-            
-                  cd "$dir"
-            
-            
-                  terraform fmt -check -recursive
-            
-            
-                  terraform init
-            
-            
-                  terraform validate -no-color
-            
-            
-            
-                  TFVARS=$(find . -maxdepth 1 -name "*.tfvars" | head -1)
-            
-            
-            
-                  if [ -n "$TFVARS" ]
-            
-                  then
-            
-                    echo "Using variables: $TFVARS"
-            
-            
-                    terraform plan \
-                    -out=tfplan \
-                    -var-file="$TFVARS" \
-                    -no-color
-            
-            
-                  else
-            
-            
-                    terraform plan \
-                    -out=tfplan \
-                    -no-color
-            
-            
-                  fi
-            
-            
-            
-                  terraform show \
-                  -json tfplan \
-                  > "$GITHUB_WORKSPACE/ai-results/$(echo $dir | tr '/' '_')-terraform-plan.json"
-            
-            
-            
-                  cd "$GITHUB_WORKSPACE"
-            
-            
-                done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
-            
-            
-                  - name: Run Trivy Terraform Scan
-            
-                    run: |
+             run: |
             
             
                       trivy config ./environments \
