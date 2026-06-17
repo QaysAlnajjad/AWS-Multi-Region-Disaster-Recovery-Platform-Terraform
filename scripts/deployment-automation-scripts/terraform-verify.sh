@@ -10,6 +10,7 @@ verify_stack(){
 
 stack=$1
 
+
 echo "======================"
 echo "Checking $stack"
 echo "======================"
@@ -39,11 +40,11 @@ if [ -n "$FOUND" ]; then
 
   TFVARS="-var-file=$(basename "$FOUND")"
 
-  echo "Using vars: $TFVARS"
-
 fi
 
 
+
+echo "Running terraform plan..."
 
 set +e
 
@@ -51,8 +52,8 @@ set +e
 terraform -chdir="environments/$stack" plan \
 ${STACK_VARS[$stack]} \
 $TFVARS \
--no-color
-
+-no-color \
+-detailed-exitcode
 
 
 RESULT=$?
@@ -62,21 +63,37 @@ set -e
 
 
 
-if [ $RESULT -eq 0 ]; then
+case $RESULT in
 
-echo "✅ $stack: No changes"
+0)
 
-elif [ $RESULT -eq 2 ]; then
+echo "✅ $stack : clean"
 
-echo "⚠️ $stack: Changes detected (plan is valid)"
+;;
 
-else
+1)
 
-echo "❌ $stack: Terraform plan failed"
+echo "❌ $stack : terraform error"
+
+exit 1
+
+;;
+
+2)
+
+echo "⚠️ $stack : changes detected"
+
+;;
+
+*)
+
+echo "❌ unexpected terraform exit code: $RESULT"
 
 exit $RESULT
 
-fi
+;;
+
+esac
 
 
 }
@@ -100,7 +117,6 @@ verify_stack "dr/ecs"
 verify_stack "operations/dr_orchestration"
 
 verify_stack "primary/failover_alarms"
-
 
 
 echo "======================"
