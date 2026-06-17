@@ -1,14 +1,14 @@
 module "lambda_db_setup" {
   source = "../../../modules/iam"
 
-  role_name = "lambda-wordpress-db-setup-role"
+  role_name            = "lambda-wordpress-db-setup-role"
   assume_role_services = ["lambda.amazonaws.com"]
-  policy_name = "lambda-wordpress-db-setup-policy"
+  policy_name          = "lambda-wordpress-db-setup-policy"
 
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
   ]
-  
+
   inline_policy_statements = [
     # Logs
     {

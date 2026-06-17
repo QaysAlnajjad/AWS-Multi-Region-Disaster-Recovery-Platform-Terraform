@@ -13,10 +13,10 @@
 module "ecs_task" {
   source = "../../../modules/iam"
 
-  role_name = "ecs-task-role"
+  role_name            = "ecs-task-role"
   assume_role_services = ["ecs-tasks.amazonaws.com"]
-  policy_name = "ecs-task-policy"
-  
+  policy_name          = "ecs-task-policy"
+
   managed_policy_arns = []
 
   inline_policy_statements = [

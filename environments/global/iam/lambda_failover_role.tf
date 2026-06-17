@@ -1,17 +1,17 @@
 module "lambda_failover" {
   source = "../../../modules/iam"
 
-  role_name = "lambda-failover-functions-role"
+  role_name            = "lambda-failover-functions-role"
   assume_role_services = ["lambda.amazonaws.com"]
-  policy_name = "lambda-failover-functions-policy"
+  policy_name          = "lambda-failover-functions-policy"
 
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
   ]
-  
+
   inline_policy_statements = [
 
-  # Logs
+    # Logs
     {
       Effect = "Allow"
       Action = [
@@ -19,7 +19,7 @@ module "lambda_failover" {
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ]
-      Resource = ["arn:aws:logs:*:*:*"]    
+      Resource = ["arn:aws:logs:*:*:*"]
     },
 
     # CloudWatch
@@ -51,7 +51,7 @@ module "lambda_failover" {
       ]
       Resource = ["*"]
     },
-    
+
     # SecretManager 
     {
       Effect = "Allow"

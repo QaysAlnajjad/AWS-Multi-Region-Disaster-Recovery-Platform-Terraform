@@ -8,122 +8,122 @@
 
 # Enable Container Insights at account level
 resource "aws_ecs_account_setting_default" "container_insights" {
-  name = "containerInsights"
+  name  = "containerInsights"
   value = "enabled"
 }
 
 resource "aws_ecs_cluster" "wordpress" {
-    name = var.ecs_cluster_name 
-    
-    setting {
-      name  = "containerInsights"
-      value = "enabled"
-    }
-    
-    tags = { Name = var.ecs_cluster_name  }
+  name = var.ecs_cluster_name
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+
+  tags = { Name = var.ecs_cluster_name }
 }
 
 data "aws_region" "current" {}
 
 locals {
   container_definition = {
-      name = "wordpress-container"
-      image = var.ecr_image_uri
-      portMappings = [{ containerPort = 80, protocol = "tcp" }]
+    name         = "wordpress-container"
+    image        = var.ecr_image_uri
+    portMappings = [{ containerPort = 80, protocol = "tcp" }]
 
-      environment = [
-        {
-          name = "AWS_REGION"          # Required for AWS SDK
-          value = data.aws_region.current.name
-        },
-        {
-          name = "AWS_S3_BUCKET"       # Used by AS3CF, WP Offload Media needs bucket name
-          value = var.s3_bucket_name
-        },
-        {
-          name = "CLOUDFRONT_DOMAIN"   # Used by AS3CF
-          value = var.cloudfront_distribution_domain
-        },        
-        {
-          name = "WORDPRESS_URL"
-          value = "https://${var.primary_domain}"
-        },
-        {
-          name  = "WORDPRESS_ADMIN_URL"
-          value = "https://admin.${var.primary_domain}"
-        }
-      ]
-
-      secrets = [
-        {
-          name = "WORDPRESS_DB_HOST"
-          valueFrom = "${var.wordpress_secret_arn}:host::"
-        },
-        {
-          name = "WORDPRESS_DB_NAME"
-          valueFrom = "${var.wordpress_secret_arn}:dbname::"
-        },
-        {
-          name = "WORDPRESS_DB_USER"
-          valueFrom = "${var.wordpress_secret_arn}:username::"
-        },
-        {
-          name = "WORDPRESS_DB_PASSWORD"
-          valueFrom = "${var.wordpress_secret_arn}:password::"
-        }
-      ]
-      
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group" = "/ecs/${var.ecs_task_definition.family}"
-          "awslogs-region" = data.aws_region.current.name
-          "awslogs-stream-prefix" = "ecs"
-        }
+    environment = [
+      {
+        name  = "AWS_REGION" # Required for AWS SDK
+        value = data.aws_region.current.name
+      },
+      {
+        name  = "AWS_S3_BUCKET" # Used by AS3CF, WP Offload Media needs bucket name
+        value = var.s3_bucket_name
+      },
+      {
+        name  = "CLOUDFRONT_DOMAIN" # Used by AS3CF
+        value = var.cloudfront_distribution_domain
+      },
+      {
+        name  = "WORDPRESS_URL"
+        value = "https://${var.primary_domain}"
+      },
+      {
+        name  = "WORDPRESS_ADMIN_URL"
+        value = "https://admin.${var.primary_domain}"
       }
+    ]
+
+    secrets = [
+      {
+        name      = "WORDPRESS_DB_HOST"
+        valueFrom = "${var.wordpress_secret_arn}:host::"
+      },
+      {
+        name      = "WORDPRESS_DB_NAME"
+        valueFrom = "${var.wordpress_secret_arn}:dbname::"
+      },
+      {
+        name      = "WORDPRESS_DB_USER"
+        valueFrom = "${var.wordpress_secret_arn}:username::"
+      },
+      {
+        name      = "WORDPRESS_DB_PASSWORD"
+        valueFrom = "${var.wordpress_secret_arn}:password::"
+      }
+    ]
+
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = "/ecs/${var.ecs_task_definition.family}"
+        "awslogs-region"        = data.aws_region.current.name
+        "awslogs-stream-prefix" = "ecs"
+      }
+    }
   }
 }
 
 resource "aws_ecs_task_definition" "wordpress" {
-    family = var.ecs_task_definition.family
-    network_mode = "awsvpc"
-    requires_compatibilities = ["FARGATE"]
-    cpu = var.ecs_task_definition.cpu
-    memory = var.ecs_task_definition.memory
-    execution_role_arn = var.ecs_execution_role_arn
-    task_role_arn = var.ecs_task_role_arn
-    container_definitions = jsonencode([local.container_definition])
-    tags = { 
-      Name = var.ecs_task_definition.name
-      project = "wordpress"
-      principal = "ecs"
-    }
+  family                   = var.ecs_task_definition.family
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.ecs_task_definition.cpu
+  memory                   = var.ecs_task_definition.memory
+  execution_role_arn       = var.ecs_execution_role_arn
+  task_role_arn            = var.ecs_task_role_arn
+  container_definitions    = jsonencode([local.container_definition])
+  tags = {
+    Name      = var.ecs_task_definition.name
+    project   = "wordpress"
+    principal = "ecs"
+  }
 }
 
 resource "aws_ecs_service" "wordpress" {
-    name = var.ecs_service_name
-    cluster = aws_ecs_cluster.wordpress.id
-    task_definition = aws_ecs_task_definition.wordpress.arn
-    desired_count = var.ecs_task_desired_count
-    launch_type = "FARGATE"
-    enable_execute_command = true
-    propagate_tags = "SERVICE"
-    tags = {
-      project = "wordpress"
-      principal = "ecs"
-    }
+  name                   = var.ecs_service_name
+  cluster                = aws_ecs_cluster.wordpress.id
+  task_definition        = aws_ecs_task_definition.wordpress.arn
+  desired_count          = var.ecs_task_desired_count
+  launch_type            = "FARGATE"
+  enable_execute_command = true
+  propagate_tags         = "SERVICE"
+  tags = {
+    project   = "wordpress"
+    principal = "ecs"
+  }
 
-    network_configuration {
-      subnets = var.private_subnets_ids
-      security_groups = [var.ecs_service_sg_id]
-      assign_public_ip = false
-    }
+  network_configuration {
+    subnets          = var.private_subnets_ids
+    security_groups  = [var.ecs_service_sg_id]
+    assign_public_ip = false
+  }
 
-    load_balancer {
-      target_group_arn = var.target_group_arn
-      container_name = "wordpress-container"
-      container_port = 80
-    }
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = "wordpress-container"
+    container_port   = 80
+  }
 }
 
 
@@ -139,10 +139,10 @@ resource "aws_ecs_service" "wordpress" {
 
 # CloudWatch Log Group for ECS tasks
 resource "aws_cloudwatch_log_group" "ecs_logs" {
-    name = "/ecs/${var.ecs_task_definition.family}"
-    retention_in_days = 7
-    tags = { Name = "${var.ecs_task_definition.name}-logs" }
-  }
+  name              = "/ecs/${var.ecs_task_definition.family}"
+  retention_in_days = 7
+  tags              = { Name = "${var.ecs_task_definition.name}-logs" }
+}
 
 
 

@@ -3,125 +3,125 @@
 //=============================================================================================================
 
 vpc_config = {
-    name = "WordPress-DR-VPC"
-    cidr_block = "172.16.0.0/16"    
+  name       = "WordPress-DR-VPC"
+  cidr_block = "172.16.0.0/16"
 }
 
 route_table_config = {
-    DR-Public-RT = {
-        routes = {
-            default = {
-                cidr_block = "0.0.0.0/0"
-                gateway = true
-            }
-        }
-        subnets_names = ["DR-Pub-A", "DR-Pub-B"]
+  DR-Public-RT = {
+    routes = {
+      default = {
+        cidr_block = "0.0.0.0/0"
+        gateway    = true
+      }
     }
-    DR-Private-RT = {
-        subnets_names = ["DR-Prv-A", "DR-Prv-B"]
-    }
+    subnets_names = ["DR-Pub-A", "DR-Pub-B"]
+  }
+  DR-Private-RT = {
+    subnets_names = ["DR-Prv-A", "DR-Prv-B"]
+  }
 }
 
 
 security_group_config = {
-    RDS-SG = {
-        ingress= {
-            mysql_access = {
-                ip_protocol = "tcp"
-                from_port = 3306
-                to_port = 3306
-                vpc_cidr = true
-            }
-        }
+  RDS-SG = {
+    ingress = {
+      mysql_access = {
+        ip_protocol = "tcp"
+        from_port   = 3306
+        to_port     = 3306
+        vpc_cidr    = true
+      }
     }
-    Lambda-SG = {
-        egress = {
-            mysql_access = {
-                ip_protocol = "tcp"
-                from_port = 3306
-                to_port = 3306
-                source_security_group_name = "RDS-SG"
-            }
-            https_access = {                       
-                ip_protocol = "tcp"
-                from_port = 443
-                to_port = 443
-                source_security_group_name = "SecretsManager-Endpoint-SG"
-            }
-        }
+  }
+  Lambda-SG = {
+    egress = {
+      mysql_access = {
+        ip_protocol                = "tcp"
+        from_port                  = 3306
+        to_port                    = 3306
+        source_security_group_name = "RDS-SG"
+      }
+      https_access = {
+        ip_protocol                = "tcp"
+        from_port                  = 443
+        to_port                    = 443
+        source_security_group_name = "SecretsManager-Endpoint-SG"
+      }
     }
-    SecretsManager-Endpoint-SG = {
-        ingress = {
-            https_access = {
-                ip_protocol = "tcp"
-                from_port = 443
-                to_port = 443
-                vpc_cidr = true
-            }
-        }
+  }
+  SecretsManager-Endpoint-SG = {
+    ingress = {
+      https_access = {
+        ip_protocol = "tcp"
+        from_port   = 443
+        to_port     = 443
+        vpc_cidr    = true
+      }
     }
-    ALB-SG = {
-        ingress = {
-            https_access = { 
-                from_port = 443
-                to_port = 443
-                ip_protocol = "tcp"
-                cidr_block = "0.0.0.0/0"
-                # prefix_list_ids = ["pl-38a64351"]
-            }
-        }
-        egress = {
-            ecs_access = {
-                from_port = 80
-                to_port = 80
-                ip_protocol = "tcp"
-                vpc_cidr = true
-            }
-        }
+  }
+  ALB-SG = {
+    ingress = {
+      https_access = {
+        from_port   = 443
+        to_port     = 443
+        ip_protocol = "tcp"
+        cidr_block  = "0.0.0.0/0"
+        # prefix_list_ids = ["pl-38a64351"]
+      }
     }
-    wordpress-service-SG = {
-        ingress = {
-            http = {
-                from_port = 80
-                to_port = 80 
-                ip_protocol = "tcp"
-                source_security_group_name = "ALB-SG"
-            }
-        }
-        egress = {
-            all = {
-                from_port = 0
-                to_port = 0
-                ip_protocol = "-1"
-                cidr_block = "0.0.0.0/0"
-            }
-        }
+    egress = {
+      ecs_access = {
+        from_port   = 80
+        to_port     = 80
+        ip_protocol = "tcp"
+        vpc_cidr    = true
+      }
     }
-    vpc-endpoints-SG = {
-        ingress = {
-            https = {
-                ip_protocol = "tcp"
-                from_port = 443
-                to_port = 443
-                source_security_group_name = "wordpress-service-SG"
-            }
-        }
+  }
+  wordpress-service-SG = {
+    ingress = {
+      http = {
+        from_port                  = 80
+        to_port                    = 80
+        ip_protocol                = "tcp"
+        source_security_group_name = "ALB-SG"
+      }
     }
-    Lambda-validate-db-writable-SG = {
-        egress = {
-            mysql_access = {
-                ip_protocol = "tcp"
-                from_port = 3306
-                to_port = 3306
-                source_security_group_name = "RDS-SG"
-            }
-            https_access = {                       
-                ip_protocol = "tcp"
-                from_port = 443
-                to_port = 443
-                source_security_group_name = "SecretsManager-Endpoint-SG"
-            }
-        }
+    egress = {
+      all = {
+        from_port   = 0
+        to_port     = 0
+        ip_protocol = "-1"
+        cidr_block  = "0.0.0.0/0"
+      }
     }
+  }
+  vpc-endpoints-SG = {
+    ingress = {
+      https = {
+        ip_protocol                = "tcp"
+        from_port                  = 443
+        to_port                    = 443
+        source_security_group_name = "wordpress-service-SG"
+      }
+    }
+  }
+  Lambda-validate-db-writable-SG = {
+    egress = {
+      mysql_access = {
+        ip_protocol                = "tcp"
+        from_port                  = 3306
+        to_port                    = 3306
+        source_security_group_name = "RDS-SG"
+      }
+      https_access = {
+        ip_protocol                = "tcp"
+        from_port                  = 443
+        to_port                    = 443
+        source_security_group_name = "SecretsManager-Endpoint-SG"
+      }
+    }
+  }
 }
 

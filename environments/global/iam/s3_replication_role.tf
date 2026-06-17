@@ -1,10 +1,10 @@
 module "s3_replication" {
   source = "../../../modules/iam"
 
-  role_name = "s3-cross-region-replication-role"
+  role_name            = "s3-cross-region-replication-role"
   assume_role_services = ["s3.amazonaws.com"]
-  policy_name = "s3-cross-region-replication-policy"
-  
+  policy_name          = "s3-cross-region-replication-policy"
+
   managed_policy_arns = []
 
   inline_policy_statements = [

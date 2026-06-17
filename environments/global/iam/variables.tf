@@ -1,21 +1,21 @@
 data "aws_caller_identity" "current" {}
 
 variable "dr_region" {
-    type = string
+  type = string
 }
 
 variable "rds_identifier" {
-    type = string
+  type = string
 }
 
 variable "rds_replica_identifier" {
-    type = string
+  type = string
 }
 
 variable "primary_media_s3_bucket" {
-    type = string
+  type = string
 }
 
 variable "dr_media_s3_bucket" {
-    type = string
+  type = string
 }

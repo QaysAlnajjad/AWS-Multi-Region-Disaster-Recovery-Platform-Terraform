@@ -1,3 +1,3 @@
 variable "rds_identifier" {
-    type = string
+  type = string
 }

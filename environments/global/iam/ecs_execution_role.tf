@@ -16,9 +16,9 @@
 module "ecs_execution" {
   source = "../../../modules/iam"
 
-  role_name = "ecs-execution-role"
+  role_name            = "ecs-execution-role"
   assume_role_services = ["ecs-tasks.amazonaws.com"]
-  policy_name = "ecs-execution-policy"
+  policy_name          = "ecs-execution-policy"
 
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"

@@ -1,29 +1,29 @@
 # CloudWatch Log Group for Lambda function
 resource "aws_cloudwatch_log_group" "main" {
-  for_each = var.function
-  name = "/aws/lambda/${var.name_prefix}/${each.key}"
+  for_each          = var.function
+  name              = "/aws/lambda/${var.name_prefix}/${each.key}"
   retention_in_days = 7
-  tags       = {
+  tags = {
     Name = each.key
   }
 }
 
 data "archive_file" "main" {
-  for_each = var.function
-  type = "zip"
-  source_dir = "${var.lambda_source_base}/${each.key}"
+  for_each    = var.function
+  type        = "zip"
+  source_dir  = "${var.lambda_source_base}/${each.key}"
   output_path = "${path.module}/build/${each.key}.zip"
 }
 
 resource "aws_lambda_function" "main" {
-  for_each = var.function
+  for_each      = var.function
   function_name = each.key
   role          = each.value.role_arn
   handler       = "app.lambda_handler"
   runtime       = "python3.12"
   timeout       = each.value.timeout
 
-  filename         = data.archive_file.main[each.key].output_path
+  filename = data.archive_file.main[each.key].output_path
 
   source_code_hash = data.archive_file.main[each.key].output_base64sha256
 
@@ -43,8 +43,8 @@ resource "aws_lambda_function" "main" {
 
   depends_on = [aws_cloudwatch_log_group.main]
 
-  tags       = {
-    Name = each.key
+  tags = {
+    Name      = each.key
     Component = each.value.component
   }
 }

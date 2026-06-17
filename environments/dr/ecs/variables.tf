@@ -8,16 +8,16 @@ variable "ecs_cluster_name" {
 
 variable "ecs_task_definition_config" {
   type = object({
-    name = string
-    family = string
-    cpu = string
-    memory = string
+    name     = string
+    family   = string
+    cpu      = string
+    memory   = string
     rds_name = string
   })
 }
 
 variable "ecs_service_name" {
-  type = string 
+  type = string
 }
 
 variable "ecs_service_sg_name" {

@@ -12,9 +12,9 @@ variable "ecs_cluster_name" {
 
 variable "ecs_task_definition" {
   type = object({
-    name = string
+    name   = string
     family = string
-    cpu = string
+    cpu    = string
     memory = string
   })
 }
@@ -25,9 +25,9 @@ variable "ecr_image_uri" {
 
 variable "enable_ecr_pull_through" {
   description = "Enable creating an ECR pull-through cache rule (requires upstream auth if registry requires it)"
-  type = bool
-  default = false
-}  
+  type        = bool
+  default     = false
+}
 
 
 variable "s3_bucket_name" {
@@ -62,11 +62,11 @@ variable "ecs_task_desired_count" {
   type = number
 }
 
-variable "target_group_arn" {            
+variable "target_group_arn" {
   type = string
 }
 
-variable "private_subnets_ids" {          
+variable "private_subnets_ids" {
   type = list(string)
 }
 

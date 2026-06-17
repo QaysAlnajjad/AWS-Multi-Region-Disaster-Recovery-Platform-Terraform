@@ -24,15 +24,15 @@ variable "ecs_service_name" {
 }
 
 variable "ecs_desired_count" {
-  type = number
+  type    = number
   default = 2
 }
 
 variable "app_healthcheck" {
   type = object({
-    path         = string
-    timeout      = number
-    status_code  = number
+    path        = string
+    timeout     = number
+    status_code = number
   })
   default = {
     path        = "https://rqays.com"

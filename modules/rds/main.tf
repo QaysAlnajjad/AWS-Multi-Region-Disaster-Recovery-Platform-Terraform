@@ -3,7 +3,7 @@
 //==========================================================================================================================================
 
 resource "aws_db_subnet_group" "wordpress" {
-  name = "${var.rds_identifier}-subnet-group"
+  name       = "${var.rds_identifier}-subnet-group"
   subnet_ids = var.rds.subnets_ids
 }
 
@@ -15,22 +15,22 @@ resource "random_password" "master" {
 
 
 resource "aws_db_instance" "rds" {
-  identifier = var.rds_identifier
-  engine = "mysql"
-  engine_version = var.rds.engine_version
-  instance_class = var.rds.instance_class
-  multi_az = var.rds.multi_az 
-  vpc_security_group_ids = [var.rds.security_group_id]
-  db_subnet_group_name = aws_db_subnet_group.wordpress.name
-  publicly_accessible = false
-  allocated_storage = 20    
-  storage_type = "gp2"             
-  storage_encrypted = false
-  username = var.rds.username
-  password = random_password.master.result
-  db_name = var.rds.db_name
+  identifier              = var.rds_identifier
+  engine                  = "mysql"
+  engine_version          = var.rds.engine_version
+  instance_class          = var.rds.instance_class
+  multi_az                = var.rds.multi_az
+  vpc_security_group_ids  = [var.rds.security_group_id]
+  db_subnet_group_name    = aws_db_subnet_group.wordpress.name
+  publicly_accessible     = false
+  allocated_storage       = 20
+  storage_type            = "gp2"
+  storage_encrypted       = false
+  username                = var.rds.username
+  password                = random_password.master.result
+  db_name                 = var.rds.db_name
   backup_retention_period = 7
-  skip_final_snapshot = true
+  skip_final_snapshot     = true
 }
 
 

@@ -1,14 +1,14 @@
 variable "vpc_id" {
-    type = string
+  type = string
 }
 
 variable "private_subnets_ids" {
-    type = list(string) 
+  type = list(string)
 }
 
 variable "vpc_endpoints" {
   type = map(object({
-    type = string
+    type              = string
     security_group_id = optional(string)
   }))
 }

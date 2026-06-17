@@ -15,16 +15,16 @@ variable "policy_name" {
 }
 
 variable "managed_policy_arns" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "inline_policy_statements" {
   type = list(object({
-    Effect = string
-    Action = list(string)
-    Resource = list(string)
-    Condition = optional(map(map(string))) 
+    Effect    = string
+    Action    = list(string)
+    Resource  = list(string)
+    Condition = optional(map(map(string)))
   }))
   default = []
 }

@@ -1,14 +1,14 @@
 variable "s3_bucket_name" {
-    type = string
+  type = string
 }
 
 variable "ecs_task_role_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "cloudfront_distribution_arn" {
-    type = string
-    default = ""
+  type    = string
+  default = ""
 }
 
