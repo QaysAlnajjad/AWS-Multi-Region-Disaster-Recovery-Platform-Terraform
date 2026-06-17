@@ -36,7 +36,7 @@ jobs:
 
       - name: Checkout repository
 
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
 
 
@@ -70,12 +70,9 @@ jobs:
 
         run: |
 
-
           sudo apt-get update
 
-
           sudo apt-get install -y wget gnupg
-
 
 
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
@@ -83,17 +80,12 @@ jobs:
           -o /usr/share/keyrings/trivy.gpg
 
 
-
-
           echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
           https://aquasecurity.github.io/trivy-repo/deb generic main" \
           | sudo tee /etc/apt/sources.list.d/trivy.list
 
 
-
-
           sudo apt-get update
-
 
           sudo apt-get install trivy -y
 
@@ -114,15 +106,23 @@ jobs:
       - name: Terraform Verification
 
         shell: bash
+
         env:
+
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+
           TF_STATE_BUCKET_REGION: us-east-1
+
 
         run: |
 
+
           chmod +x scripts/deployment-automation-scripts/terraform-verify.sh
 
+
           ./scripts/deployment-automation-scripts/terraform-verify.sh
+
+
 
 
 
@@ -152,7 +152,4 @@ jobs:
           name: infrastructure-review-results
 
 
-          path: |
-
-
-            ai-results/
+          path: ai-results/
