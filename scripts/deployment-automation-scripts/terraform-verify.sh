@@ -10,7 +10,6 @@ verify_stack(){
 
 stack=$1
 
-
 echo "======================"
 echo "Checking $stack"
 echo "======================"
@@ -24,21 +23,11 @@ terraform -chdir="environments/$stack" init \
 
 
 
-terraform -chdir="environments/$stack" fmt -check || terraform -chdir="environments/$stack" fmt
+terraform -chdir="environments/$stack" fmt -check
+
+
+
 terraform -chdir="environments/$stack" validate
-
-
-
-TFVARS=""
-
-FOUND=$(find environments/$stack -maxdepth 1 -name "*.tfvars" | head -1)
-
-
-if [ -n "$FOUND" ]; then
-
-  TFVARS="-var-file=$(basename "$FOUND")"
-
-fi
 
 
 
@@ -49,7 +38,6 @@ set +e
 
 terraform -chdir="environments/$stack" plan \
 ${STACK_VARS[$stack]} \
-$TFVARS \
 -no-color \
 -detailed-exitcode
 
@@ -61,37 +49,21 @@ set -e
 
 
 
-case $RESULT in
+if [ $RESULT -eq 0 ]; then
 
-0)
+echo "✅ $stack OK"
 
-echo "✅ $stack : clean"
+elif [ $RESULT -eq 2 ]; then
 
-;;
+echo "⚠️ $stack has changes"
 
-1)
+else
 
-echo "❌ $stack : terraform error"
-
-exit 1
-
-;;
-
-2)
-
-echo "⚠️ $stack : changes detected"
-
-;;
-
-*)
-
-echo "❌ unexpected terraform exit code: $RESULT"
+echo "❌ $stack failed"
 
 exit $RESULT
 
-;;
-
-esac
+fi
 
 
 }
@@ -99,9 +71,11 @@ esac
 
 
 verify_stack "global/iam"
+
 verify_stack "global/oac"
 
 verify_stack "primary/network"
+
 verify_stack "primary/rds"
 
 verify_stack "dr/network"
