@@ -38,11 +38,25 @@ then
 fi
 
 
+set +e
+
 terraform -chdir="environments/$stack" plan \
 ${STACK_VARS[$stack]} \
 $TFVARS \
 -no-color
 
+RESULT=$?
+
+set -e
+
+
+if [ $RESULT -ne 0 ]; then
+
+echo "❌ Terraform plan failed for $stack"
+
+exit $RESULT
+
+fi
 
 echo "✅ $stack OK"
 
