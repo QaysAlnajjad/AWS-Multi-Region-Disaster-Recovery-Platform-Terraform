@@ -1,29 +1,44 @@
 name: Infrastructure AI Review
 
+
 on:
+
   workflow_call:
+
   workflow_dispatch:
 
 
+
 permissions:
+
   contents: read
+
   id-token: write
+
 
 
 jobs:
 
+
   review:
+
 
     name: Terraform Infrastructure Review
 
+
     runs-on: ubuntu-latest
+
 
 
     steps:
 
 
+
       - name: Checkout repository
+
         uses: actions/checkout@v4
+
+
 
 
 
@@ -41,9 +56,13 @@ jobs:
 
 
 
+
+
       - name: Setup Terraform
 
         uses: hashicorp/setup-terraform@v3
+
+
 
 
 
@@ -51,13 +70,19 @@ jobs:
 
         run: |
 
+
           sudo apt-get update
 
+
           sudo apt-get install -y wget gnupg
+
+
 
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
           | sudo gpg --dearmor \
           -o /usr/share/keyrings/trivy.gpg
+
+
 
 
           echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
@@ -65,71 +90,56 @@ jobs:
           | sudo tee /etc/apt/sources.list.d/trivy.list
 
 
+
+
           sudo apt-get update
+
 
           sudo apt-get install trivy -y
 
 
 
 
-      - name: Discover Terraform directories
 
-        id: terraform_dirs
+      - name: Prepare AI Results directory
+
+        run: |
+
+          mkdir -p ai-results
+
+
+
+
+
+      - name: Terraform Verification
 
         shell: bash
 
         run: |
 
 
-          dirs=$(find ./environments \
-          -type f \
-          -name "*.tf" \
-          -not -path "*/.terraform/*" \
-          -exec dirname {} \; \
-          | sort -u)
+          chmod +x scripts/terraform-verify.sh
 
 
 
-          echo "$dirs"
-
-
-          echo "dirs<<EOF" >> $GITHUB_OUTPUT
-
-          echo "$dirs" >> $GITHUB_OUTPUT
-
-          echo "EOF" >> $GITHUB_OUTPUT
+          ./scripts/terraform-verify.sh
 
 
 
-            
-            - name: Terraform Validation and Plan
-            
-              shell: bash
-            
-              run: |
-            
-                mkdir -p ai-results
-            
 
-            - name: Terraform Verify
 
-              run: |
+      - name: Run Trivy Terraform Scan
 
-                chmod +x scripts/terraform-verify.sh
+        shell: bash
 
-                ./scripts/terraform-verify.sh            
-            
-           - name: Run Trivy Terraform Scan
-            
-             run: |
-            
-            
-                      trivy config ./environments \
-                      --format json \
-                      --output ai-results/trivy-results.json
-            
-            
-            
+        run: |
+
+
+          trivy config ./environments \
+          --format json \
+          --output ai-results/trivy-results.json
+
+
 
 
 
@@ -137,10 +147,14 @@ jobs:
 
         uses: actions/upload-artifact@v4
 
+
         with:
+
 
           name: infrastructure-review-results
 
-          path:
+
+          path: |
+
 
             ai-results/
