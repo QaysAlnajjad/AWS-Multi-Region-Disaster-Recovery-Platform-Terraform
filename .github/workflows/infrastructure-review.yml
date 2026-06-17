@@ -109,9 +109,9 @@ jobs:
 
         env:
 
-          TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_BUCKET_NAME: terraform-state-17062026
 
-          TF_STATE_BUCKET_REGION: us-east-1
+          TF_STATE_BUCKET_REGION: eu-central-1
 
 
         run: |
