@@ -29,12 +29,17 @@ terraform -chdir="environments/$stack" fmt -check
 terraform -chdir="environments/$stack" validate
 
 
-
 TFVARS=""
 
-if [ -f "environments/$stack/${stack##*/}.tfvars" ]
-then
-  TFVARS="-var-file=${stack##*/}.tfvars"
+FOUND=$(find environments/$stack -maxdepth 1 -name "*.tfvars" | head -1)
+
+
+if [ -n "$FOUND" ]; then
+
+TFVARS="-var-file=$(basename $FOUND)"
+
+echo "Using vars: $TFVARS"
+
 fi
 
 
