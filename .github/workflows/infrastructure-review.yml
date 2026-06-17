@@ -109,7 +109,7 @@ jobs:
 
         env:
 
-          TF_STATE_BUCKET_NAME: terraform-state-17062026
+          TF_STATE_BUCKET_NAME: "terraform-state-17062026"
 
           TF_STATE_BUCKET_REGION: eu-central-1
 
