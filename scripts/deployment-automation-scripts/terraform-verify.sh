@@ -6,9 +6,24 @@ source "$(dirname "$0")/config.sh"
 source "$(dirname "$0")/stacks_config.sh"
 
 
+
+check_state(){
+
+stack=$1
+
+aws s3api head-object \
+--bucket "$TF_STATE_BUCKET_NAME" \
+--key "environments/$stack/terraform.tfstate" \
+>/dev/null 2>&1
+
+}
+
+
+
 verify_stack(){
 
 stack=$1
+
 
 echo "======================"
 echo "Checking $stack"
@@ -31,7 +46,21 @@ terraform -chdir="environments/$stack" validate
 
 
 
-echo "Running terraform plan..."
+if ! check_state "$stack"
+then
+
+echo "⚠️ State missing for $stack"
+echo "Skipping terraform plan"
+
+return
+
+fi
+
+
+
+echo "Running terraform plan"
+
+
 
 set +e
 
@@ -49,21 +78,29 @@ set -e
 
 
 
-if [ $RESULT -eq 0 ]; then
+case $RESULT in
 
-echo "✅ $stack OK"
+0)
 
-elif [ $RESULT -eq 2 ]; then
+echo "✅ $stack clean"
+
+;;
+
+2)
 
 echo "⚠️ $stack has changes"
 
-else
+;;
+
+*)
 
 echo "❌ $stack failed"
 
 exit $RESULT
 
-fi
+;;
+
+esac
 
 
 }
@@ -91,6 +128,5 @@ verify_stack "operations/dr_orchestration"
 verify_stack "primary/failover_alarms"
 
 
-echo "======================"
+
 echo "Verification completed"
-echo "======================"
