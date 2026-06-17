@@ -1,38 +1,28 @@
 name: Infrastructure AI Review
 
-
 on:
-
   workflow_call:
-
   workflow_dispatch:
 
 
-
 permissions:
-
   contents: read
   id-token: write
 
 
-
 jobs:
 
-
   review:
-
 
     name: Terraform Infrastructure Review
 
     runs-on: ubuntu-latest
 
 
-
     steps:
 
 
       - name: Checkout repository
-
         uses: actions/checkout@v4
 
 
@@ -56,31 +46,32 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
 
+
       - name: Install Trivy
-      
+
         run: |
-      
+
           sudo apt-get update
-      
+
           sudo apt-get install -y wget gnupg
-      
+
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
-          | gpg --dearmor \
-          | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-      
-      
+          | sudo gpg --dearmor \
+          -o /usr/share/keyrings/trivy.gpg
+
+
           echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
-          https://aquasecurity.github.io/trivy-repo/deb \
-          generic main" \
+          https://aquasecurity.github.io/trivy-repo/deb generic main" \
           | sudo tee /etc/apt/sources.list.d/trivy.list
-      
-      
+
+
           sudo apt-get update
-      
-          sudo apt-get install -y trivy
-      
-      
-      
+
+          sudo apt-get install trivy -y
+
+
+
+
       - name: Discover Terraform directories
 
         id: terraform_dirs
@@ -89,14 +80,15 @@ jobs:
 
         run: |
 
+
           dirs=$(find ./environments \
           -type f \
           -name "*.tf" \
+          -not -path "*/.terraform/*" \
           -exec dirname {} \; \
           | sort -u)
 
 
-          echo "Terraform directories found:"
 
           echo "$dirs"
 
@@ -110,120 +102,105 @@ jobs:
 
 
 
-      - name: Terraform Validation
+
+      - name: Terraform Validation and Plan
 
         shell: bash
 
         run: |
+
+
+          mkdir -p ai-results
+
 
 
           while read dir
 
           do
 
-            echo "================================"
+
+            echo "=============================="
 
             echo "Checking: $dir"
 
-            echo "================================"
+            echo "=============================="
+
 
 
             cd "$dir"
 
 
-            terraform fmt -recursive
+
+            terraform fmt -check -recursive
+
 
 
             terraform init \
             -backend=false
 
 
+
             terraform validate -no-color
 
 
-            cd - > /dev/null
+
+            TFVARS=$(find . -maxdepth 1 -name "*.tfvars" | head -1)
+
+
+
+            if [ -n "$TFVARS" ]
+
+            then
+
+
+              terraform plan \
+              -out=tfplan \
+              -var-file="$TFVARS" \
+              -no-color
+
+
+            else
+
+
+              terraform plan \
+              -out=tfplan \
+              -no-color
+
+
+            fi
+
+
+
+            terraform show \
+            -json tfplan \
+            > "$GITHUB_WORKSPACE/ai-results/$(echo $dir | tr '/' '_')-terraform-plan.json"
+
+
+
+            cd "$GITHUB_WORKSPACE"
+
 
 
           done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
 
-          
-          
-      - name: Terraform Plan
-          
-        shell: bash
-          
+
+
+
+
+
+      - name: Run Trivy Terraform Scan
+
         run: |
-        
-            mkdir -p ai-results
-        
-        
-            while read dir
-        
-            do
-        
-              echo "=============================="
-              echo "Planning: $dir"
-              echo "=============================="
-        
-        
-              cd "$dir"
-        
-        
-              terraform init \
-              -backend=false
-        
-        
-        
-              TFVARS=$(find . -maxdepth 1 -name "*.tfvars" | head -1)
-        
-        
-        
-              if [ -n "$TFVARS" ]
-        
-              then
-        
-                echo "Using variables file: $TFVARS"
-        
-        
-                terraform plan \
-                -out=tfplan \
-                -var-file="$TFVARS" \
-                -no-color
-        
-        
-              else
-        
-        
-                terraform plan \
-                -out=tfplan \
-                -no-color
-        
-        
-              fi
-        
-        
-        
-              terraform show \
-              -json tfplan \
-              > "../../ai-results/$(echo $dir | tr '/' '_')-terraform-plan.json"
-        
-        
-        
-              cd - > /dev/null
-        
-        
-            done <<< "${{ steps.terraform_dirs.outputs.dirs }}"      - name: Run Trivy Terraform Scan
-        
-                run: |
-              
-                  mkdir -p ai-results
-              
-                  trivy config ./environments \
-                    --format json \
-                    --output ai-results/trivy-results.json
-        
-        
-  
+
+
+          trivy config ./environments \
+          --format json \
+          --output ai-results/trivy-results.json
+
+
+
+
+
 
       - name: Upload Infrastructure Review Results
 
@@ -233,4 +210,6 @@ jobs:
 
           name: infrastructure-review-results
 
-          path: ai-results/
+          path:
+
+            ai-results/
