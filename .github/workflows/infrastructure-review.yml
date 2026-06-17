@@ -118,7 +118,7 @@ jobs:
         run: |
 
 
-          chmod +x scripts/terraform-verify.sh
+          chmod +x scripts/deployment-automation-scripts/terraform-verify.sh
 
 
 
