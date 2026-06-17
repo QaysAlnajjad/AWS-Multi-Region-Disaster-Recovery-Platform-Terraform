@@ -25,8 +25,8 @@ variable "ecr_image_uri" {
 
 variable "enable_ecr_pull_through" {
   description = "Enable creating an ECR pull-through cache rule (requires upstream auth if registry requires it)"
-  type        = bool
-  default     = false
+  type = bool
+  default = false
 }  
 
 
