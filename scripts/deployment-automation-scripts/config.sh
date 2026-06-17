@@ -7,7 +7,7 @@ DR_REGION="ca-central-1"
 ############################################
 #  Terraform Backend Config
 ############################################
-TF_STATE_BUCKET_NAME="terraform-state-110420261"
+TF_STATE_BUCKET_NAME="terraform-state-17062026"
 TF_STATE_BUCKET_REGION="eu-central-1"
 
 ############################################
