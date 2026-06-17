@@ -29,6 +29,7 @@ terraform -chdir="environments/$stack" fmt -check
 terraform -chdir="environments/$stack" validate
 
 
+
 TFVARS=""
 
 FOUND=$(find environments/$stack -maxdepth 1 -name "*.tfvars" | head -1)
@@ -36,34 +37,47 @@ FOUND=$(find environments/$stack -maxdepth 1 -name "*.tfvars" | head -1)
 
 if [ -n "$FOUND" ]; then
 
-TFVARS="-var-file=$(basename $FOUND)"
+  TFVARS="-var-file=$(basename "$FOUND")"
 
-echo "Using vars: $TFVARS"
+  echo "Using vars: $TFVARS"
 
 fi
 
 
+
 set +e
+
 
 terraform -chdir="environments/$stack" plan \
 ${STACK_VARS[$stack]} \
 $TFVARS \
 -no-color
 
+
+
 RESULT=$?
+
 
 set -e
 
 
-if [ $RESULT -ne 0 ]; then
 
-echo "❌ Terraform plan failed for $stack"
+if [ $RESULT -eq 0 ]; then
+
+echo "✅ $stack: No changes"
+
+elif [ $RESULT -eq 2 ]; then
+
+echo "⚠️ $stack: Changes detected (plan is valid)"
+
+else
+
+echo "❌ $stack: Terraform plan failed"
 
 exit $RESULT
 
 fi
 
-echo "✅ $stack OK"
 
 }
 
@@ -86,6 +100,7 @@ verify_stack "dr/ecs"
 verify_stack "operations/dr_orchestration"
 
 verify_stack "primary/failover_alarms"
+
 
 
 echo "======================"
