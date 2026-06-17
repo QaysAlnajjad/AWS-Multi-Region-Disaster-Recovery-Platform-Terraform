@@ -101,104 +101,90 @@ jobs:
 
 
 
-
-
-      - name: Terraform Validation and Plan
-
-        shell: bash
-
-        run: |
-
-
-          mkdir -p ai-results
-
-
-
-          while read dir
-
-          do
-
-
-            echo "=============================="
-
-            echo "Checking: $dir"
-
-            echo "=============================="
-
-
-
-            cd "$dir"
-
-
-
-            terraform fmt -check -recursive
-
-
-
-            terraform init \
-            -backend=false
-
-
-
-            terraform validate -no-color
-
-
-
-            TFVARS=$(find . -maxdepth 1 -name "*.tfvars" | head -1)
-
-
-
-            if [ -n "$TFVARS" ]
-
-            then
-
-
-              terraform plan \
-              -out=tfplan \
-              -var-file="$TFVARS" \
-              -no-color
-
-
-            else
-
-
-              terraform plan \
-              -out=tfplan \
-              -no-color
-
-
-            fi
-
-
-
-            terraform show \
-            -json tfplan \
-            > "$GITHUB_WORKSPACE/ai-results/$(echo $dir | tr '/' '_')-terraform-plan.json"
-
-
-
-            cd "$GITHUB_WORKSPACE"
-
-
-
-          done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
-
-
-
-
-
-
-      - name: Run Trivy Terraform Scan
-
-        run: |
-
-
-          trivy config ./environments \
-          --format json \
-          --output ai-results/trivy-results.json
-
-
-
+            
+            - name: Terraform Validation and Plan
+            
+              shell: bash
+            
+              run: |
+            
+                mkdir -p ai-results
+            
+            
+                while read dir
+            
+                do
+            
+                  echo "=============================="
+                  echo "Checking: $dir"
+                  echo "=============================="
+            
+            
+                  cd "$dir"
+            
+            
+                  terraform fmt -check -recursive
+            
+            
+                  terraform init
+            
+            
+                  terraform validate -no-color
+            
+            
+            
+                  TFVARS=$(find . -maxdepth 1 -name "*.tfvars" | head -1)
+            
+            
+            
+                  if [ -n "$TFVARS" ]
+            
+                  then
+            
+                    echo "Using variables: $TFVARS"
+            
+            
+                    terraform plan \
+                    -out=tfplan \
+                    -var-file="$TFVARS" \
+                    -no-color
+            
+            
+                  else
+            
+            
+                    terraform plan \
+                    -out=tfplan \
+                    -no-color
+            
+            
+                  fi
+            
+            
+            
+                  terraform show \
+                  -json tfplan \
+                  > "$GITHUB_WORKSPACE/ai-results/$(echo $dir | tr '/' '_')-terraform-plan.json"
+            
+            
+            
+                  cd "$GITHUB_WORKSPACE"
+            
+            
+                done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
+            
+            
+                  - name: Run Trivy Terraform Scan
+            
+                    run: |
+            
+            
+                      trivy config ./environments \
+                      --format json \
+                      --output ai-results/trivy-results.json
+            
+            
+            
 
 
 
