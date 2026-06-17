@@ -24,8 +24,7 @@ terraform -chdir="environments/$stack" init \
 
 
 
-terraform -chdir="environments/$stack" fmt -check
-
+terraform -chdir="environments/$stack" fmt -check -diff
 
 terraform -chdir="environments/$stack" validate
 
