@@ -146,69 +146,84 @@ jobs:
 
           done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
 
-
-
-
+          
+          
       - name: Terraform Plan
-
+          
         shell: bash
-
+          
         run: |
-
-
-          mkdir -p ai-results
-
-
-
-          while read dir
-
-          do
-
-
-            name=$(echo "$dir" | tr '/' '_')
-
-
-            echo "Planning: $dir"
-
-
-            cd "$dir"
-
-
-            terraform init
-
-
-            terraform plan \
-            -out=tfplan \
-            -no-color
-
-
-
-            terraform show \
-            -json tfplan \
-            > "../../ai-results/${name}-terraform-plan.json"
-
-
-
-            cd - > /dev/null
-
-
-          done <<< "${{ steps.terraform_dirs.outputs.dirs }}"
-
-
-
-
-      - name: Run Trivy Terraform Scan
-
-        run: |
-      
-          mkdir -p ai-results
-      
-          trivy config ./environments \
-            --format json \
-            --output ai-results/trivy-results.json
-
-
-
+        
+            mkdir -p ai-results
+        
+        
+            while read dir
+        
+            do
+        
+              echo "=============================="
+              echo "Planning: $dir"
+              echo "=============================="
+        
+        
+              cd "$dir"
+        
+        
+              terraform init \
+              -backend=false
+        
+        
+        
+              TFVARS=$(find . -maxdepth 1 -name "*.tfvars" | head -1)
+        
+        
+        
+              if [ -n "$TFVARS" ]
+        
+              then
+        
+                echo "Using variables file: $TFVARS"
+        
+        
+                terraform plan \
+                -out=tfplan \
+                -var-file="$TFVARS" \
+                -no-color
+        
+        
+              else
+        
+        
+                terraform plan \
+                -out=tfplan \
+                -no-color
+        
+        
+              fi
+        
+        
+        
+              terraform show \
+              -json tfplan \
+              > "../../ai-results/$(echo $dir | tr '/' '_')-terraform-plan.json"
+        
+        
+        
+              cd - > /dev/null
+        
+        
+            done <<< "${{ steps.terraform_dirs.outputs.dirs }}"      - name: Run Trivy Terraform Scan
+        
+                run: |
+              
+                  mkdir -p ai-results
+              
+                  trivy config ./environments \
+                    --format json \
+                    --output ai-results/trivy-results.json
+        
+        
+  
 
       - name: Upload Infrastructure Review Results
 
