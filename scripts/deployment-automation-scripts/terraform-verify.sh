@@ -39,7 +39,7 @@ terraform -chdir="environments/$stack" fmt -check
 terraform -chdir="environments/$stack" validate
 
 
-echo "Running terraform plan"
+echo "Running terraform plan for validation only"
 
 
 terraform -chdir="environments/$stack" plan \
