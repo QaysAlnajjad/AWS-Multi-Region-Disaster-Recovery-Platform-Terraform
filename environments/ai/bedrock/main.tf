@@ -64,7 +64,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
   knowledge_base_configuration {
 
-    type = "VECTOR"
+    type = "VECTOR"      // RAG works with embeddings 
 
     vector_knowledge_base_configuration {
 
