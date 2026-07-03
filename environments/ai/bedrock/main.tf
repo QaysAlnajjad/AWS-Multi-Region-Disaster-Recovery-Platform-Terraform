@@ -99,3 +99,30 @@ resource "aws_bedrockagent_knowledge_base" "main" {
   }
 
 }
+
+
+//==================================================================================
+//  Create Bedrock data source
+//==================================================================================
+
+resource "aws_bedrockagent_data_source" "terraform_docs" {
+
+    knowledge_base_id = ...
+
+    data_source_configuration {
+
+        type="S3"
+
+        s3_configuration {
+
+            bucket_arn = module.knowledge_bucket.bucket_arn
+
+        }
+
+    }
+
+}
+
+
+
+
