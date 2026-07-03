@@ -23,7 +23,7 @@ module "bedrock_role" {
         "bedrock:*",
         "s3:GetObject",
         "s3:ListBucket",
-        "aoss:*"
+        "aoss:*"     // allow read/write from Vector Store
       ]
 
       Resource = [
