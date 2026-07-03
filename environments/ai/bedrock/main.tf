@@ -107,7 +107,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
 resource "aws_bedrockagent_data_source" "terraform_docs" {
 
-    knowledge_base_id = ...
+    knowledge_base_id = aws_bedrockagent_knowledge_base.id
 
     data_source_configuration {
 
