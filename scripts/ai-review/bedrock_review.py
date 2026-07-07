@@ -2,6 +2,7 @@ import boto3
 import json
 import sys
 
+from review_prompt import build_prompt
 
 
 bedrock_agent = boto3.client(
@@ -31,13 +32,50 @@ with open(input_file) as f:
 
 
 query = """
+AWS Terraform best practices
 
-Review this Terraform result.
-Find security issues,
-architecture problems,
-and production risks.
+Terraform infrastructure review
 
+AWS Well Architected Framework
+
+Security Best Practices
+
+IAM Least Privilege
+
+Networking
+
+High Availability
+
+Disaster Recovery
+
+Production Readiness
+
+Terraform Modules
+
+Terraform Security
+
+Cost Optimization
+
+Logging
+
+Monitoring
+
+Encryption
+
+Secrets Manager
+
+VPC
+
+ALB
+
+ECS
+
+RDS
+
+S3
 """
+
+
 
 
 
@@ -65,67 +103,62 @@ retrieval = bedrock_agent.retrieve(
 
 
 
-context=""
 
+
+context = ""
 
 for item in retrieval["retrievalResults"]:
 
     context += item["content"]["text"]
 
-
-
-prompt=f"""
-
-You are a senior AWS DevOps architect.
-
-
-Knowledge:
-
-
-{context}
+    context += "\n\n--------------------------------\n\n"
+    
 
 
 
-Terraform Result:
 
-
-{terraform_result}
-
-
-
-Return JSON only:
-
-{{
-"severity":"",
-"issues":[],
-"recommendations":[]
-}}
-
-"""
+prompt = build_prompt(
+    context=context,
+    terraform_result=terraform_result
+)
 
 
 
 response = bedrock.invoke_model(
 
-    modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
+    modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
+
+    contentType="application/json",
+
+    accept="application/json",
 
     body=json.dumps({
 
-        "messages":[
+        "anthropic_version": "bedrock-2023-05-31",
+
+        "max_tokens": 4096,
+
+        "messages": [
 
             {
 
-             "role":"user",
+                "role": "user",
 
-             "content":prompt
+                "content": [
+
+                    {
+
+                        "type": "text",
+
+                        "text": prompt
+
+                    }
+
+                ]
 
             }
 
-        ],
-
-        "max_tokens":2000,
-
-        "anthropic_version":"bedrock-2023-05-31"
+        ]
 
     })
 
@@ -133,9 +166,13 @@ response = bedrock.invoke_model(
 
 
 
-result=json.loads(
+body = json.loads(
     response["body"].read()
 )
+
+answer = body["content"][0]["text"]
+
+result = json.loads(answer)
 
 
 
