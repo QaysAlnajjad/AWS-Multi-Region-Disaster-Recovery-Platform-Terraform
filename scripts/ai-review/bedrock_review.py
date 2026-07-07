@@ -1,16 +1,19 @@
-import boto3
 import json
 import sys
 
+import boto3
+
 from review_prompt import build_prompt
 
+
+# ==============================================================================
+# AWS Clients
+# ==============================================================================
 
 bedrock_agent = boto3.client(
     "bedrock-agent-runtime",
     region_name="us-east-1"
 )
-
-
 
 bedrock = boto3.client(
     "bedrock-runtime",
@@ -18,104 +21,81 @@ bedrock = boto3.client(
 )
 
 
+# ==============================================================================
+# Inputs
+# ==============================================================================
 
-input_file=sys.argv[1]
+if len(sys.argv) != 3:
+    raise SystemExit(
+        "Usage: python bedrock_review.py <terraform-result.json> <knowledge-base-id>"
+    )
 
-kb_id=sys.argv[2]
-
-
-
-with open(input_file) as f:
-
-    terraform_result=json.load(f)
+input_file = sys.argv[1]
+knowledge_base_id = sys.argv[2]
 
 
+# ==============================================================================
+# Load Terraform Scan Result
+# ==============================================================================
 
-query = """
-AWS Terraform best practices
+with open(input_file, "r") as f:
+    terraform_result = json.load(f)
 
-Terraform infrastructure review
 
-AWS Well Architected Framework
+# ==============================================================================
+# Retrieve Context from Bedrock Knowledge Base
+# ==============================================================================
 
-Security Best Practices
+retrieval_query = f"""
+Review the following Terraform infrastructure.
 
-IAM Least Privilege
+Retrieve all documentation related to:
 
-Networking
+- services used
+- AWS best practices
+- security
+- production readiness
+- networking
+- IAM
+- disaster recovery
 
-High Availability
+Terraform result:
 
-Disaster Recovery
-
-Production Readiness
-
-Terraform Modules
-
-Terraform Security
-
-Cost Optimization
-
-Logging
-
-Monitoring
-
-Encryption
-
-Secrets Manager
-
-VPC
-
-ALB
-
-ECS
-
-RDS
-
-S3
+{json.dumps(terraform_result)}
 """
-
-
-
-
-
 retrieval = bedrock_agent.retrieve(
-
-    knowledgeBaseId=kb_id,
-
+    knowledgeBaseId=knowledge_base_id,
     retrievalQuery={
-
-        "text":query
-
+        "text": retrieval_query
     },
-
     retrievalConfiguration={
-
-        "vectorSearchConfiguration":{
-
-            "numberOfResults":5
-
+        "vectorSearchConfiguration": {
+            "numberOfResults": 10
         }
-
     }
-
 )
 
 
-
-
+# ==============================================================================
+# Build Context
+# ==============================================================================
 
 context = ""
 
-for item in retrieval["retrievalResults"]:
+for item in retrieval.get("retrievalResults", []):
+    text = item.get("content", {}).get("text", "")
 
-    context += item["content"]["text"]
+    if text:
+        context += text
+        context += "\n\n------------------------------------------------------------\n\n"
 
-    context += "\n\n--------------------------------\n\n"
-    
+if context == "":
+    context = "No knowledge base documents were retrieved."
 
 
-
+# ==============================================================================
+# Build Prompt
+# ==============================================================================
 
 prompt = build_prompt(
     context=context,
@@ -123,60 +103,64 @@ prompt = build_prompt(
 )
 
 
+# ==============================================================================
+# Invoke Claude
+# ==============================================================================
 
 response = bedrock.invoke_model(
-
     modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
-
     contentType="application/json",
-
     accept="application/json",
-
     body=json.dumps({
-
         "anthropic_version": "bedrock-2023-05-31",
-
         "max_tokens": 4096,
-
+        "temperature": 0,
         "messages": [
-
             {
-
                 "role": "user",
-
                 "content": [
-
                     {
-
                         "type": "text",
-
                         "text": prompt
-
                     }
-
                 ]
-
             }
-
         ]
-
     })
-
 )
 
 
+# ==============================================================================
+# Parse Claude Response
+# ==============================================================================
 
-body = json.loads(
-    response["body"].read()
-)
+body = json.loads(response["body"].read())
 
-answer = body["content"][0]["text"]
-
-result = json.loads(answer)
-
+answer = body["content"][0]["text"].strip()
 
 
-with open("ai-report.json","w") as f:
+# ==============================================================================
+# Parse JSON Response
+# ==============================================================================
 
-    json.dump(result,f,indent=2)
+try:
+    result = json.loads(answer)
 
+except json.JSONDecodeError:
+
+    result = {
+        "error": "Claude did not return valid JSON.",
+        "raw_response": answer
+    }
+
+
+# ==============================================================================
+# Save Report
+# ==============================================================================
+
+with open("ai-report.json", "w") as f:
+    json.dump(result, f, indent=4)
+
+
+print("AI review completed.")
+print("Report saved to ai-report.json")
