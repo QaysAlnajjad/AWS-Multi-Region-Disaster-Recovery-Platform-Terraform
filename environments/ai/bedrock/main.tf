@@ -142,7 +142,7 @@ resource "aws_opensearchserverless_security_policy" "encryption" {
           "collection/terraform-rag"
         ]
 
-        ResourceType = "collection"
+        ResourceType = "collection"   // Applied on the whole collection not just an index
       }
     ]
 
