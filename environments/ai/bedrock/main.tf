@@ -105,21 +105,23 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 //  Create Bedrock data source
 //==================================================================================
 
-resource "aws_bedrockagent_data_source" "terraform_docs" {
+resource "aws_bedrockagent_data_source" "knowledge" {
 
-    knowledge_base_id = aws_bedrockagent_knowledge_base.id
+  knowledge_base_id = aws_bedrockagent_knowledge_base.main.id
 
-    data_source_configuration {
+  name = "terraform-documents"
 
-        type="S3"
+  data_source_configuration {
 
-        s3_configuration {
+    type = "S3"
 
-            bucket_arn = module.knowledge_bucket.bucket_arn
+    s3_configuration {
 
-        }
+      bucket_arn = module.knowledge_bucket.bucket_arn
 
     }
+
+  }
 
 }
 
