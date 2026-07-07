@@ -128,6 +128,8 @@ resource "aws_bedrockagent_data_source" "terraform_docs" {
 //  Create OpenSearch 
 //==================================================================================
 
+//============= Encryption policy ============================================= 
+
 resource "aws_opensearchserverless_security_policy" "encryption" {
 
   name = "terraform-rag-encryption"
@@ -151,6 +153,122 @@ resource "aws_opensearchserverless_security_policy" "encryption" {
   })
 
 }
+
+
+//============= Network policy ============================================= 
+
+resource "aws_opensearchserverless_security_policy" "network" {
+
+  name = "terraform-rag-network"
+
+  type = "network"
+
+  policy = jsonencode([
+
+    {
+
+      Rules = [
+
+        {
+
+          Resource = [
+
+            "collection/terraform-rag"
+
+          ]
+
+          ResourceType = "collection"
+
+        }
+
+      ]
+
+      AllowFromPublic = true
+
+    }
+
+  ])
+
+}
+
+
+//============= Access policy ============================================= 
+
+resource "aws_opensearchserverless_access_policy" "bedrock" {
+
+  name = "terraform-rag-access"
+
+  type = "data"
+
+  policy = jsonencode([
+    {
+
+      Rules = [
+
+        {
+
+          ResourceType = "collection"
+
+          Resource = [
+
+            "collection/terraform-rag"
+
+          ]
+
+          Permission = [
+
+            "aoss:*"
+
+          ]
+
+        },
+
+        {
+
+          ResourceType = "index"
+
+          Resource = [
+
+            "index/terraform-rag/*"
+
+          ]
+
+          Permission = [
+
+            "aoss:*"
+
+          ]
+
+        }
+
+      ]
+
+      Principal = [
+
+        module.bedrock_role.role_arn
+
+      ]
+
+    }
+
+  ])
+
+}
+
+
+//============= OpenSearch Collection ============================================= 
+
+resource "aws_opensearchserverless_collection" "vector" {
+
+  name = "terraform-rag"
+
+  type = "VECTORSEARCH"
+
+}
+
+
+
+
 
 
 
