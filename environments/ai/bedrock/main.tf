@@ -124,6 +124,34 @@ resource "aws_bedrockagent_data_source" "terraform_docs" {
 }
 
 
+//==================================================================================
+//  Create OpenSearch 
+//==================================================================================
+
+resource "aws_opensearchserverless_security_policy" "encryption" {
+
+  name = "terraform-rag-encryption"
+
+  type = "encryption"
+
+  policy = jsonencode({
+
+    Rules = [
+      {
+        Resource = [
+          "collection/terraform-rag"
+        ]
+
+        ResourceType = "collection"
+      }
+    ]
+
+    AWSOwnedKey = true
+
+  })
+
+}
+
 
 
 
