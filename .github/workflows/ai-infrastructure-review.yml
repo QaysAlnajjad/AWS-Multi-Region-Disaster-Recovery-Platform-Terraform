@@ -1,0 +1,148 @@
+name: AI Infrastructure Review
+
+
+
+on:
+
+
+  workflow_dispatch:
+
+
+  workflow_call:
+
+
+
+
+permissions:
+
+  contents: read
+
+  id-token: write
+
+
+
+
+
+jobs:
+
+
+
+  review:
+
+
+
+    name: Terraform AI Review
+
+    runs-on: ubuntu-latest
+
+
+
+
+
+    steps:
+
+
+
+      - name: Checkout
+
+        uses: actions/checkout@v5
+
+
+
+
+
+      - name: Configure AWS Credentials
+
+
+        uses: aws-actions/configure-aws-credentials@v4
+
+
+        with:
+
+          role-to-assume: arn:aws:iam::<account-id>:role/github-actions-terraform-role
+
+          aws-region: us-east-1
+
+
+
+
+
+      - name: Run Terraform Verification
+
+
+        run: |
+
+
+          chmod +x scripts/deployment-automation-scripts/terraform-verify.sh
+
+
+          ./scripts/deployment-automation-scripts/terraform-verify.sh \
+          > terraform-result.txt || true
+
+
+
+
+
+      - name: Create AI Input JSON
+
+
+        run: |
+
+
+          cat <<EOF > ai-request.json
+
+          {
+
+          "project":"AWS Multi Region DR Platform",
+
+          "check_type":"terraform verification",
+
+          "result":"
+
+          $(cat terraform-result.txt)
+
+          "
+
+          }
+
+          EOF
+
+
+
+
+
+
+      - name: Send Result To Bedrock
+
+
+        env:
+
+          KB_ID: ${{ secrets.BEDROCK_KB_ID }}
+
+        run:
+
+
+          python scripts/ai-review/bedrock_review.py \
+          ai-request.json \
+          $KB_ID
+
+
+
+
+
+      - name: Upload AI Report
+
+
+        uses: actions/upload-artifact@v4
+
+
+        with:
+
+
+          name: terraform-ai-report
+
+
+          path:
+
+
+            ai-report.json
