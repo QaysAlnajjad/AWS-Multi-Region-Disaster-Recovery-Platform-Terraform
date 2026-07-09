@@ -100,9 +100,9 @@ jobs:
 
         run: |
 
-          chmod +x scripts/deployment-automation-scripts/terraform-validate.sh
+          chmod +x scripts/deployment/terraform-validate.sh
 
-          ./scripts/deployment-automation-scripts/terraform-validate.sh
+          ./scripts/deployment/terraform-validate.sh
 
       ##################################################################
       # Trivy
