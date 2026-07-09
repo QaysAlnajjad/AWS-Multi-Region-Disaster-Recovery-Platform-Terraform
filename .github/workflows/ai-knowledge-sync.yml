@@ -1,45 +1,53 @@
-name: AI Knowledge Base Sync
-
+name: Bedrock Knowledge Sync
 
 on:
 
   workflow_dispatch:
 
   push:
+
     paths:
-      - "docs/**"
-      - "modules/**"
-      - "environments/**"
+
+      - "knowledge/**"
 
 
 permissions:
 
-  contents: read
   id-token: write
 
+  contents: read
 
 
 jobs:
 
-
-  sync-knowledge:
-
-
-    name: Sync Terraform Knowledge Base
+  knowledge-sync:
 
     runs-on: ubuntu-latest
 
+    env:
 
+      AWS_REGION: us-east-1
+
+      KNOWLEDGE_BUCKET: ${{ secrets.KNOWLEDGE_BUCKET }}
+
+      KNOWLEDGE_BASE_ID: ${{ secrets.KNOWLEDGE_BASE_ID }}
+
+      DATA_SOURCE_ID: ${{ secrets.DATA_SOURCE_ID }}
 
     steps:
 
+      ####################################################################
+      # Checkout Repository
+      ####################################################################
+
+      - name: Checkout
+
+        uses: actions/checkout@v4
 
 
-      - name: Checkout repository
-
-        uses: actions/checkout@v5
-
-
+      ####################################################################
+      # Configure AWS Credentials
+      ####################################################################
 
       - name: Configure AWS Credentials
 
@@ -47,69 +55,44 @@ jobs:
 
         with:
 
-          role-to-assume: arn:aws:iam::<account-id>:role/github-actions-terraform-role
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
 
-          aws-region: us-east-1
-
-
-
-      - name: Install AWS CLI
-
-        run: |
-
-          aws --version
+          aws-region: ${{ env.AWS_REGION }}
 
 
+      ####################################################################
+      # Upload Knowledge Documents
+      ####################################################################
 
-      - name: Prepare knowledge documents
+      - name: Upload Knowledge Documents
 
         run: |
-
-          mkdir knowledge-upload
-
-          cp -r docs/* knowledge-upload/
-
-          cp -r modules/* knowledge-upload/
-
-          cp -r environments/* knowledge-upload/
-
-
-
-      - name: Upload documents to S3 Knowledge Bucket
-
-        env:
-
-          KNOWLEDGE_BUCKET: terraform-ai-knowledge-17062026
-
-        run:
 
           aws s3 sync \
-          knowledge-upload/ \
-          s3://${KNOWLEDGE_BUCKET}/documents/
+            knowledge/ \
+            s3://${KNOWLEDGE_BUCKET}/ \
+            --delete
 
 
+      ####################################################################
+      # Start Bedrock Ingestion
+      ####################################################################
 
-      - name: Start Bedrock Knowledge Base Sync
-
-        env:
-
-          KNOWLEDGE_BASE_ID: ${{ secrets.BEDROCK_KB_ID }}
-
-          DATA_SOURCE_ID: ${{ secrets.BEDROCK_DATA_SOURCE_ID }}
-
+      - name: Start Bedrock Ingestion
 
         run: |
 
-
-          aws bedrock-agent start-ingestion-job \
-          --knowledge-base-id $KNOWLEDGE_BASE_ID \
-          --data-source-id $DATA_SOURCE_ID \
-          --region us-east-1
+          python scripts/ai-review/start_ingestion.py \
+            ${KNOWLEDGE_BASE_ID} \
+            ${DATA_SOURCE_ID}
 
 
+      ####################################################################
+      # Wait Until Ingestion Finishes
+      ####################################################################
 
-      - name: Wait for ingestion
+      - name: Wait For Ingestion
 
         run: |
 
-          echo "Knowledge Base ingestion started"
+          python scripts/ai-review/wait_ingestion.py
