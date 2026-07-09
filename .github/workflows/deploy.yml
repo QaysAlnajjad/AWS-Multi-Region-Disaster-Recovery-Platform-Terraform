@@ -38,13 +38,13 @@ jobs:
 
       - name: Make deployment scripts executable
         run: |
-          chmod +x scripts/deployment-automation-scripts/deploy.sh
-          chmod +x scripts/deployment-automation-scripts/destroy.sh
-          chmod +x scripts/deployment-automation-scripts/pull-docker-hub-to-ecr.sh
+          chmod +x scripts/deployment/deploy.sh
+          chmod +x scripts/deployment/destroy.sh
+          chmod +x scripts/deployment/pull-docker-hub-to-ecr.sh
 
 
       - name: Run Deployment Script
-        run: ./scripts/deployment-automation-scripts/deploy.sh
+        run: ./scripts/deployment/deploy.sh
 
 
       - name: Upload errored state if present
