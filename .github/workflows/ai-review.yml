@@ -22,25 +22,45 @@ jobs:
 
       AWS_REGION: us-east-1
 
-      KNOWLEDGE_BASE_ID: ${{ secrets.BEDROCK_KNOWLEDGE_BASE_ID }}
-
     steps:
 
+      ##################################################################
+      # Checkout Repository
+      ##################################################################
+
       - name: Checkout Repository
+
         uses: actions/checkout@v5
 
+      ##################################################################
+      # Configure AWS Credentials
+      ##################################################################
+
       - name: Configure AWS Credentials
+
         uses: aws-actions/configure-aws-credentials@v4
 
         with:
+
           role-to-assume: arn:aws:iam::127214183643:role/github-actions-terraform-role
+
           aws-region: ${{ env.AWS_REGION }}
 
+      ##################################################################
+      # Setup Python
+      ##################################################################
+
       - name: Setup Python
+
         uses: actions/setup-python@v5
 
         with:
+
           python-version: "3.12"
+
+      ##################################################################
+      # Install Python Dependencies
+      ##################################################################
 
       - name: Install Python Dependencies
 
@@ -48,8 +68,17 @@ jobs:
 
           pip install boto3
 
+      ##################################################################
+      # Setup Terraform
+      ##################################################################
+
       - name: Setup Terraform
+
         uses: hashicorp/setup-terraform@v3
+
+      ##################################################################
+      # Install Trivy
+      ##################################################################
 
       - name: Install Trivy
 
@@ -68,13 +97,21 @@ jobs:
 
           sudo apt-get update
 
-          sudo apt-get install trivy -y
+          sudo apt-get install -y trivy
+
+      ##################################################################
+      # Install Checkov
+      ##################################################################
 
       - name: Install Checkov
 
         run: |
 
           pip install checkov
+
+      ##################################################################
+      # Create Results Directory
+      ##################################################################
 
       - name: Create Results Directory
 
@@ -83,7 +120,7 @@ jobs:
           mkdir -p ai-results
 
       ##################################################################
-      # Terraform fmt
+      # Terraform Format Check
       ##################################################################
 
       - name: Terraform Format Check
@@ -130,7 +167,7 @@ jobs:
             > ai-results/checkov.json
 
       ##################################################################
-      # Create AI Review Input
+      # Create Review Input
       ##################################################################
 
       - name: Create Review Input
@@ -138,7 +175,6 @@ jobs:
         run: |
 
           python scripts/ai-review/review_create_input.py
-
 
       ##################################################################
       # Bedrock AI Review
@@ -148,13 +184,14 @@ jobs:
 
         run: |
 
+          source scripts/common/load-ai-config.sh
+
           python scripts/ai-review/bedrock_review.py \
             ai-results/review_input.json \
-            $KNOWLEDGE_BASE_ID
-
+            "${KNOWLEDGE_BASE_ID}"
 
       ##################################################################
-      # Add Metadata
+      # Enrich AI Report
       ##################################################################
 
       - name: Enrich AI Report
@@ -162,7 +199,6 @@ jobs:
         run: |
 
           python scripts/ai-review/enrich_report.py
-
 
       ##################################################################
       # Upload Final Report
@@ -176,6 +212,4 @@ jobs:
 
           name: ai-infrastructure-review-report
 
-          path: |
-
-            ai-results/ai-report.json
+          path: ai-results/ai-report.json
