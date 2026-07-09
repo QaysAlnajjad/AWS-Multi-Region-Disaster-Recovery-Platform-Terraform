@@ -130,7 +130,7 @@ jobs:
             > ai-results/checkov.json
 
       ##################################################################
-      # Create Review Input
+      # Create AI Review Input
       ##################################################################
 
       - name: Create Review Input
@@ -139,11 +139,12 @@ jobs:
 
           python scripts/ai-review/review_create_input.py
 
+
       ##################################################################
-      # AI Review
+      # Bedrock AI Review
       ##################################################################
 
-      - name: Bedrock Review
+      - name: Run Bedrock Review
 
         run: |
 
@@ -151,8 +152,20 @@ jobs:
             ai-results/review_input.json \
             $KNOWLEDGE_BASE_ID
 
+
       ##################################################################
-      # Upload Report
+      # Add Metadata
+      ##################################################################
+
+      - name: Enrich AI Report
+
+        run: |
+
+          python scripts/ai-review/enrich_report.py
+
+
+      ##################################################################
+      # Upload Final Report
       ##################################################################
 
       - name: Upload AI Report
@@ -161,10 +174,8 @@ jobs:
 
         with:
 
-          name: ai-review-report
+          name: ai-infrastructure-review-report
 
           path: |
-
-            ai-results/review_input.json
 
             ai-results/ai-report.json
