@@ -10,17 +10,15 @@ on:
 
       - "knowledge/**"
 
-
 permissions:
-
-  id-token: write
 
   contents: read
 
+  id-token: write
 
 jobs:
 
-  knowledge-sync:
+  sync:
 
     runs-on: ubuntu-latest
 
@@ -28,26 +26,19 @@ jobs:
 
       AWS_REGION: us-east-1
 
-      KNOWLEDGE_BUCKET: ${{ secrets.KNOWLEDGE_BUCKET }}
-
-      KNOWLEDGE_BASE_ID: ${{ secrets.KNOWLEDGE_BASE_ID }}
-
-      DATA_SOURCE_ID: ${{ secrets.DATA_SOURCE_ID }}
-
     steps:
 
-      ####################################################################
-      # Checkout Repository
-      ####################################################################
+      ##################################################################
+      # Checkout
+      ##################################################################
 
-      - name: Checkout
+      - name: Checkout Repository
 
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-
-      ####################################################################
-      # Configure AWS Credentials
-      ####################################################################
+      ##################################################################
+      # AWS Credentials
+      ##################################################################
 
       - name: Configure AWS Credentials
 
@@ -55,43 +46,66 @@ jobs:
 
         with:
 
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::127214183643:role/github-actions-terraform-role
 
           aws-region: ${{ env.AWS_REGION }}
 
+      ##################################################################
+      # Load AI Configuration
+      ##################################################################
 
-      ####################################################################
-      # Upload Knowledge Documents
-      ####################################################################
-
-      - name: Upload Knowledge Documents
+      - name: Upload Knowledge
 
         run: |
+
+          source scripts/common/load-ai-config.sh
 
           aws s3 sync \
             knowledge/ \
             s3://${KNOWLEDGE_BUCKET}/ \
             --delete
 
+      ##################################################################
+      # Setup Python
+      ##################################################################
 
-      ####################################################################
-      # Start Bedrock Ingestion
-      ####################################################################
+      - name: Setup Python
 
-      - name: Start Bedrock Ingestion
+        uses: actions/setup-python@v5
+
+        with:
+
+          python-version: "3.12"
+
+      ##################################################################
+      # Install Dependencies
+      ##################################################################
+
+      - name: Install Dependencies
 
         run: |
 
+          pip install boto3
+
+      ##################################################################
+      # Start Ingestion
+      ##################################################################
+
+      - name: Start Ingestion
+
+        run: |
+
+          source scripts/common/load-ai-config.sh
+
           python scripts/ai-review/start_ingestion.py \
-            ${KNOWLEDGE_BASE_ID} \
-            ${DATA_SOURCE_ID}
+            "${KNOWLEDGE_BASE_ID}" \
+            "${DATA_SOURCE_ID}"
 
+      ##################################################################
+      # Wait For Completion
+      ##################################################################
 
-      ####################################################################
-      # Wait Until Ingestion Finishes
-      ####################################################################
-
-      - name: Wait For Ingestion
+      - name: Wait For Completion
 
         run: |
 
