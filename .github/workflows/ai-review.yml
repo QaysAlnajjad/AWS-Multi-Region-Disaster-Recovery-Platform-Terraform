@@ -1,0 +1,170 @@
+name: AI Infrastructure Review
+
+on:
+
+  workflow_dispatch:
+
+  workflow_call:
+
+permissions:
+
+  contents: read
+
+  id-token: write
+
+jobs:
+
+  review:
+
+    runs-on: ubuntu-latest
+
+    env:
+
+      AWS_REGION: us-east-1
+
+      KNOWLEDGE_BASE_ID: ${{ secrets.BEDROCK_KNOWLEDGE_BASE_ID }}
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+          role-to-assume: arn:aws:iam::127214183643:role/github-actions-terraform-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+
+        with:
+          python-version: "3.12"
+
+      - name: Install Python Dependencies
+
+        run: |
+
+          pip install boto3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Install Trivy
+
+        run: |
+
+          sudo apt-get update
+
+          sudo apt-get install -y wget gnupg
+
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+          | sudo gpg --dearmor \
+          -o /usr/share/keyrings/trivy.gpg
+
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
+          | sudo tee /etc/apt/sources.list.d/trivy.list
+
+          sudo apt-get update
+
+          sudo apt-get install trivy -y
+
+      - name: Install Checkov
+
+        run: |
+
+          pip install checkov
+
+      - name: Create Results Directory
+
+        run: |
+
+          mkdir -p ai-results
+
+      ##################################################################
+      # Terraform fmt
+      ##################################################################
+
+      - name: Terraform Format Check
+
+        run: |
+
+          terraform fmt -check -recursive
+
+      ##################################################################
+      # Terraform Validate
+      ##################################################################
+
+      - name: Terraform Validation
+
+        run: |
+
+          chmod +x scripts/deployment-automation-scripts/terraform-validate.sh
+
+          ./scripts/deployment-automation-scripts/terraform-validate.sh
+
+      ##################################################################
+      # Trivy
+      ##################################################################
+
+      - name: Run Trivy
+
+        run: |
+
+          trivy config environments \
+            --format json \
+            --output ai-results/trivy.json
+
+      ##################################################################
+      # Checkov
+      ##################################################################
+
+      - name: Run Checkov
+
+        run: |
+
+          checkov \
+            -d environments \
+            -o json \
+            > ai-results/checkov.json
+
+      ##################################################################
+      # Create Review Input
+      ##################################################################
+
+      - name: Create Review Input
+
+        run: |
+
+          python scripts/ai-review/review_create_input.py
+
+      ##################################################################
+      # AI Review
+      ##################################################################
+
+      - name: Bedrock Review
+
+        run: |
+
+          python scripts/ai-review/bedrock_review.py \
+            ai-results/review_input.json \
+            $KNOWLEDGE_BASE_ID
+
+      ##################################################################
+      # Upload Report
+      ##################################################################
+
+      - name: Upload AI Report
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: ai-review-report
+
+          path: |
+
+            ai-results/review_input.json
+
+            ai-results/ai-report.json
