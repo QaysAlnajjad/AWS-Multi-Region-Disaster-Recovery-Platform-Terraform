@@ -15,7 +15,7 @@ AWS_REGION="${AWS_REGION:-us-east-1}"
 export KNOWLEDGE_BASE_ID=$(
 aws ssm get-parameter \
     --region "${AWS_REGION}" \
-    --name "/ai/knowledge-base/id" \
+    --name "/wordpress/ai/knowledge-base/id" \
     --query "Parameter.Value" \
     --output text
 )
@@ -23,7 +23,7 @@ aws ssm get-parameter \
 export DATA_SOURCE_ID=$(
 aws ssm get-parameter \
     --region "${AWS_REGION}" \
-    --name "/ai/data-source/id" \
+    --name "/wordpress/ai/data-source/id" \
     --query "Parameter.Value" \
     --output text
 )
@@ -31,7 +31,7 @@ aws ssm get-parameter \
 export KNOWLEDGE_BUCKET=$(
 aws ssm get-parameter \
     --region "${AWS_REGION}" \
-    --name "/ai/knowledge-bucket/name" \
+    --name "/wordpress/ai/knowledge-bucket/name" \
     --query "Parameter.Value" \
     --output text
 )
