@@ -277,7 +277,39 @@ resource "aws_opensearchserverless_collection" "vector" {
 }
 
 
+//==================================================================================
+//  Create SSM Parameter Store 
+//==================================================================================
 
+resource "aws_ssm_parameter" "knowledge_base_id" {
+
+  name  = "/ai/knowledge-base/id"
+
+  type  = "String"
+
+  value = aws_bedrockagent_knowledge_base.main.id
+
+}
+
+resource "aws_ssm_parameter" "data_source_id" {
+
+  name  = "/ai/data-source/id"
+
+  type  = "String"
+
+  value = aws_bedrockagent_data_source.knowledge.id
+
+}
+
+resource "aws_ssm_parameter" "knowledge_bucket" {
+
+  name  = "/ai/knowledge-bucket/name"
+
+  type  = "String"
+
+  value = module.knowledge_bucket.bucket_name
+
+}
 
 
 
