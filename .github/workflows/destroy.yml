@@ -26,11 +26,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Make destroy scripts executable
-        run: chmod +x scripts/deployment-automation-scripts/destroy.sh
+        run: chmod +x scripts/deployment/destroy.sh
 
 
       - name: Run Destroy Script
-        run: ./scripts/deployment-automation-scripts/destroy.sh
+        run: ./scripts/deployment/destroy.sh
 
       - name: Upload errored state if present
         if: failure()
