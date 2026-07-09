@@ -20,10 +20,10 @@ module "bedrock_role" {
       Effect = "Allow"
 
       Action = [
-        "bedrock:*",
         "s3:GetObject",
         "s3:ListBucket",
-        "aoss:*"     // allow read/write from Vector Store
+        "aoss:APIAccessAll",
+        "aoss:DashboardsAccessAll"
       ]
 
       Resource = [
