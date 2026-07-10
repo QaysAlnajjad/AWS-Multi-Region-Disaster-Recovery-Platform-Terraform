@@ -112,7 +112,7 @@ resource "aws_ssm_parameter" "knowledge_bucket" {
 
   type  = "String"
 
-  value = module.knowledge_bucket.bucket_name
+  value = value = data.terraform_remote_state.foundation.outputs.bucket_name
 
 }
 
