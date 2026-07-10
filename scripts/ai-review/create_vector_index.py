@@ -43,51 +43,51 @@ index_name = "terraform-index"
 url = f"{endpoint}/{index_name}"
 
 
-
 body = {
-
 
     "settings": {
 
+        "index": {
 
-        "index.knn": True
+            "knn": True,
 
+            "knn.algo_param.ef_search": 512
+
+        }
 
     },
 
-
     "mappings": {
-
 
         "properties": {
 
-
             "vector": {
-
 
                 "type": "knn_vector",
 
+                "dimension": 1024,
 
-                "dimension": 1024
+                "method": {
 
+                    "name": "hnsw",
+
+                    "engine": "faiss",
+
+                    "space_type": "l2"
+
+                }
 
             },
-
 
             "text": {
 
-
                 "type": "text"
-
 
             },
 
-
             "metadata": {
 
-
                 "type": "text"
-
 
             }
 
@@ -96,7 +96,6 @@ body = {
     }
 
 }
-
 
 
 response = requests.put(
