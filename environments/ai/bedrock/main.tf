@@ -51,6 +51,9 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 //  Create Bedrock data source
 //==================================================================================
 
+
+
+
 resource "aws_bedrockagent_data_source" "knowledge" {
 
   knowledge_base_id = aws_bedrockagent_knowledge_base.main.id
