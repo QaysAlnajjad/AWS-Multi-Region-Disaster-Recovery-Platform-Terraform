@@ -35,9 +35,7 @@ module "bedrock_role" {
 
         "s3:ListBucket",
 
-        "aoss:APIAccessAll",
-
-        "aoss:DashboardsAccessAll"
+        "aoss:*"
 
       ]
 
