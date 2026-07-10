@@ -229,7 +229,7 @@ resource "aws_opensearchserverless_access_policy" "access" {
       Principal = [
 
         module.bedrock_role.role_arn,
-        arn:aws:iam::127214183643:role/github-actions-terraform-role
+        "arn:aws:iam::127214183643:role/github-actions-terraform-role"
 
       ]
 
