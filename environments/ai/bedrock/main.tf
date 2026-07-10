@@ -236,7 +236,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
   name = "terraform-rag"
 
-  role_arn = data.terraform_remote_state.foundation.outputs.role_arn
+  role_arn = module.bedrock_role.role_arn
 
   knowledge_base_configuration {
 
@@ -256,7 +256,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
     opensearch_serverless_configuration {
 
-      collection_arn    = data.terraform_remote_state.foundation.outputs.collection_arn
+      collection_arn    = aws_opensearchserverless_collection.vector.arn
 
       vector_index_name = "terraform-index"
 
@@ -307,7 +307,7 @@ resource "aws_ssm_parameter" "knowledge_bucket" {
 
   type  = "String"
 
-  value = value = data.terraform_remote_state.foundation.outputs.bucket_name
+  value = value = aws_bedrockagent_knowledge_base.main.id
 
 }
 
