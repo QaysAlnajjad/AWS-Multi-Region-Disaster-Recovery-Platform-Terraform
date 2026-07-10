@@ -1,166 +1,107 @@
 //==================================================================================
-//  Create IAM role
+// IAM Role for Bedrock
 //==================================================================================
 
 module "bedrock_role" {
-  source = "../../../modules/iam"
+
+  source = "../../modules/iam"
+
 
   role_name = "bedrock-kb-role"
 
+
   policy_name = "bedrock-kb-policy"
 
+
   assume_role_services = [
+
     "bedrock.amazonaws.com"
+
   ]
+
 
   managed_policy_arns = []
 
+
   inline_policy_statements = [
+
     {
+
       Effect = "Allow"
 
+
       Action = [
+
         "s3:GetObject",
-        "s3:ListBucket",
-        "aoss:APIAccessAll",
-        "aoss:DashboardsAccessAll"
+
+        "s3:ListBucket"
+
       ]
 
+
       Resource = [
+
         "*"
+
       ]
+
     }
+
   ]
+
 }
 
 
 //==================================================================================
-//  Create S3 bucket
+// Knowledge Documents Bucket
 //==================================================================================
 
 module "knowledge_bucket" {
 
-  source = "../../../modules/s3"
+  source = "../../modules/s3"
+
 
   s3_bucket_name = var.knowledge_bucket_name
+
 
   cloudfront_distribution_arn = ""
 
   ecs_task_role_arn = ""
 
   s3_vpc_endpoint_id = ""
-}
-
-
-//==================================================================================
-//  Create Bedrock data source
-//==================================================================================
-
-resource "aws_bedrockagent_data_source" "knowledge" {
-
-  knowledge_base_id = aws_bedrockagent_knowledge_base.main.id
-
-  name = "terraform-documents"
-
-  data_source_configuration {
-
-    type = "S3"
-
-    s3_configuration {
-
-      bucket_arn = module.knowledge_bucket.bucket_arn
-
-    }
-
-  }
 
 }
 
 
 //==================================================================================
-//  Create KW
+// Store values for workflows
 //==================================================================================
 
-resource "aws_bedrockagent_knowledge_base" "main" {
 
-  name = "terraform-rag"
+resource "aws_ssm_parameter" "bedrock_role" {
 
-  role_arn = module.bedrock_role.role_arn
 
-  knowledge_base_configuration {
+  name = "/wordpress/ai/bedrock/role-arn"
 
-    type = "VECTOR"      // RAG works with embeddings 
 
-    vector_knowledge_base_configuration {
+  type = "String"
 
-      embedding_model_arn = var.embedding_model_arn
 
-    }
-
-  }
-
-  storage_configuration {
-
-    type = "OPENSEARCH_SERVERLESS"
-
-    opensearch_serverless_configuration {
-
-      collection_arn    = aws_opensearchserverless_collection.vector.arn
-
-      vector_index_name = "terraform-index"
-
-      field_mapping {
-
-        vector_field   = "vector"
-
-        text_field     = "text"
-
-        metadata_field = "metadata"
-
-      }
-
-    }
-
-  }
+  value = module.bedrock_role.role_arn
 
 }
 
 
-//==================================================================================
-//  Create SSM Parameter Store 
-//==================================================================================
-
-resource "aws_ssm_parameter" "knowledge_base_id" {
-
-  name  = "/wordpress/ai/knowledge-base/id"
-
-  type  = "String"
-
-  value = aws_bedrockagent_knowledge_base.main.id
-
-}
-
-resource "aws_ssm_parameter" "data_source_id" {
-
-  name  = "/wordpress/ai/data-source/id"
-
-  type  = "String"
-
-  value = aws_bedrockagent_data_source.knowledge.id
-
-}
 
 resource "aws_ssm_parameter" "knowledge_bucket" {
 
-  name  = "/wordpress/ai/knowledge-bucket/name"
 
-  type  = "String"
+  name = "/wordpress/ai/knowledge/bucket-name"
 
-  value = value = aws_bedrockagent_knowledge_base.main.id
+
+  type = "String"
+
+
+  value = module.knowledge_bucket.bucket_name
 
 }
-
-
-
-
-
