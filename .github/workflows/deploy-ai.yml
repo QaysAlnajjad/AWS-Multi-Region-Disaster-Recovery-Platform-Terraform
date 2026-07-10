@@ -1,0 +1,104 @@
+name: Deploy AI Infrastructure
+
+on:
+
+  workflow_dispatch:
+
+permissions:
+
+  contents: read
+
+  id-token: write
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    env:
+
+      AWS_REGION: us-east-1
+
+    defaults:
+
+      run:
+
+        shell: bash
+
+        working-directory: environments/production/ai
+
+    steps:
+
+      ##################################################################
+      # Checkout Repository
+      ##################################################################
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v5
+
+      ##################################################################
+      # Configure AWS Credentials
+      ##################################################################
+
+      - name: Configure AWS Credentials
+
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+
+          role-to-assume: arn:aws:iam::127214183643:role/github-actions-terraform-role
+
+          aws-region: ${{ env.AWS_REGION }
+
+      ##################################################################
+      # Setup Terraform
+      ##################################################################
+
+      - name: Setup Terraform
+
+        uses: hashicorp/setup-terraform@v3
+
+      ##################################################################
+      # Terraform Init
+      ##################################################################
+
+      - name: Terraform Init
+
+        run: |
+
+          terraform init
+
+      ##################################################################
+      # Terraform Validate
+      ##################################################################
+
+      - name: Terraform Validate
+
+        run: |
+
+          terraform validate
+
+      ##################################################################
+      # Terraform Plan
+      ##################################################################
+
+      - name: Terraform Plan
+
+        run: |
+
+          terraform plan \
+            -out=tfplan
+
+      ##################################################################
+      # Terraform Apply
+      ##################################################################
+
+      - name: Terraform Apply
+
+        run: |
+
+          terraform apply \
+            -auto-approve \
+            tfplan
