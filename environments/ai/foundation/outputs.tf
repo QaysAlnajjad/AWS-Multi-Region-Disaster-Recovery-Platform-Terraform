@@ -7,5 +7,5 @@ output "bucket_arn" {
 }
 
 output "collection_arn" { 
-  value = module.knowledge_bucket.bucket_arn
+  value = aws_opensearchserverless_collection.vector.collection_arn
 }
