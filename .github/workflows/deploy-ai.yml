@@ -1,8 +1,11 @@
 name: Deploy AI Infrastructure
 
+
 on:
 
   workflow_dispatch:
+
+
 
 permissions:
 
@@ -10,95 +13,78 @@ permissions:
 
   id-token: write
 
+
+
 jobs:
 
-  deploy:
 
-    runs-on: ubuntu-latest
+ deploy:
 
-    env:
 
-      AWS_REGION: us-east-1
+  runs-on: ubuntu-latest
 
-    defaults:
 
-      run:
 
-        shell: bash
+  env:
 
-        working-directory: environments/ai/bedrock
+    AWS_REGION: us-east-1
 
-    steps:
 
-      ##################################################################
-      # Checkout Repository
-      ##################################################################
 
-      - name: Checkout Repository
+  defaults:
 
-        uses: actions/checkout@v5
 
-      ##################################################################
-      # Configure AWS Credentials
-      ##################################################################
+    run:
 
-      - name: Configure AWS Credentials
 
-        uses: aws-actions/configure-aws-credentials@v4
+      shell: bash
 
-        with:
 
-          role-to-assume: arn:aws:iam::127214183643:role/github-actions-terraform-role
+      working-directory: environments/ai
 
-          aws-region: ${{ env.AWS_REGION }}
 
-      ##################################################################
-      # Setup Terraform
-      ##################################################################
 
-      - name: Setup Terraform
+  steps:
 
-        uses: hashicorp/setup-terraform@v3
 
-      ##################################################################
-      # Terraform Init
-      ##################################################################
 
-      - name: Terraform Init
+  - name: Checkout
 
-        run: |
+    uses: actions/checkout@v5
 
-          terraform init
 
-      ##################################################################
-      # Terraform Validate
-      ##################################################################
 
-      - name: Terraform Validate
+  - name: AWS Credentials
 
-        run: |
+    uses: aws-actions/configure-aws-credentials@v4
 
-          terraform validate
 
-      ##################################################################
-      # Terraform Plan
-      ##################################################################
+    with:
 
-      - name: Terraform Plan
 
-        run: |
+      role-to-assume: arn:aws:iam::127214183643:role/github-actions-terraform-role
 
-          terraform plan \
-            -out=tfplan
-            
-      ##################################################################
-      # Terraform Apply
-      ##################################################################
 
-      - name: Terraform Apply
+      aws-region: ${{ env.AWS_REGION }}
 
-        run: |
 
-          terraform apply \
-            -auto-approve \
-            tfplan
+
+  - name: Setup Terraform
+
+    uses: hashicorp/setup-terraform@v3
+
+
+
+  - name: Terraform Init
+
+    run:
+
+      terraform init
+
+
+
+  - name: Terraform Apply
+
+    run:
+
+      terraform apply -auto-approve
