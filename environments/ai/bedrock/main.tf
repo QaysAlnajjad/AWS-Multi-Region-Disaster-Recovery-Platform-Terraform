@@ -4,7 +4,7 @@
 
 module "bedrock_role" {
 
-  source = "../../modules/iam"
+  source = "../../../modules/iam"
 
 
   role_name = "bedrock-kb-role"
@@ -62,7 +62,7 @@ module "bedrock_role" {
 module "knowledge_bucket" {
 
 
-  source = "../../modules/s3"
+  source = "../../../modules/s3"
 
 
   s3_bucket_name = var.knowledge_bucket_name
@@ -287,7 +287,7 @@ resource "null_resource" "create_vector_index" {
 
 pip install boto3 requests requests-aws4auth
 
-python ../../scripts/ai/create_vector_index.py \
+python ../../../scripts/ai/create_vector_index.py \
 ${aws_opensearchserverless_collection.vector.collection_endpoint}
 
 EOF
