@@ -88,7 +88,7 @@ resource "aws_bedrockagent_data_source" "knowledge" {
 
 resource "aws_ssm_parameter" "knowledge_base_id" {
 
-  name  = "/ai/knowledge-base/id"
+  name  = "/wordpress/ai/knowledge-base/id"
 
   type  = "String"
 
@@ -98,7 +98,7 @@ resource "aws_ssm_parameter" "knowledge_base_id" {
 
 resource "aws_ssm_parameter" "data_source_id" {
 
-  name  = "/ai/data-source/id"
+  name  = "/wordpress/ai/data-source/id"
 
   type  = "String"
 
@@ -108,7 +108,7 @@ resource "aws_ssm_parameter" "data_source_id" {
 
 resource "aws_ssm_parameter" "knowledge_bucket" {
 
-  name  = "/ai/knowledge-bucket/name"
+  name  = "/wordpress/ai/knowledge-bucket/name"
 
   type  = "String"
 
