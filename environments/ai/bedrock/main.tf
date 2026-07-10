@@ -36,7 +36,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
     opensearch_serverless_configuration {
 
-      collection_arn    = aws_opensearchserverless_collection.vector.arn
+      collection_arn    = data.terraform_remote_state.foundation.outputs.collection_arn
 
       vector_index_name = "terraform-index"
 
