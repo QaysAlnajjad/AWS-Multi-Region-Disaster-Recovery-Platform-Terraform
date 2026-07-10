@@ -13,3 +13,7 @@ output "bucket_name" {
 output "collection_arn" { 
   value = aws_opensearchserverless_collection.vector.arn
 }
+
+output "collection_endpoint" {
+  value = aws_opensearchserverless_collection.vector.collection_endpoint
+}
