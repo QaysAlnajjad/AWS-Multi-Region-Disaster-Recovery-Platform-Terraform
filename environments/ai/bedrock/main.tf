@@ -51,7 +51,14 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 //  Create Bedrock data source
 //==================================================================================
 
-
+data "terraform_remote_state" "foundation" {
+  backend = "s3"
+  config = {
+    bucket = var.state_bucket_name
+    key    = "environments/ai/foundation/terraform.tfstate"
+    region = var.state_bucket_region
+  }
+}
 
 
 resource "aws_bedrockagent_data_source" "knowledge" {
