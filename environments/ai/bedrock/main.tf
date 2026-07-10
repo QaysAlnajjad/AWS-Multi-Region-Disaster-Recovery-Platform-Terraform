@@ -9,7 +9,6 @@ module "bedrock_role" {
 
   role_name = "bedrock-kb-role"
 
-
   policy_name = "bedrock-kb-policy"
 
 
@@ -34,7 +33,11 @@ module "bedrock_role" {
 
         "s3:GetObject",
 
-        "s3:ListBucket"
+        "s3:ListBucket",
+
+        "aoss:APIAccessAll",
+
+        "aoss:DashboardsAccessAll"
 
       ]
 
@@ -53,10 +56,11 @@ module "bedrock_role" {
 
 
 //==================================================================================
-// Knowledge Documents Bucket
+// S3 Knowledge Bucket
 //==================================================================================
 
 module "knowledge_bucket" {
+
 
   source = "../../modules/s3"
 
@@ -74,34 +78,190 @@ module "knowledge_bucket" {
 
 
 //==================================================================================
-// Store values for workflows
+// OpenSearch Encryption Policy
 //==================================================================================
 
-
-resource "aws_ssm_parameter" "bedrock_role" {
-
-
-  name = "/wordpress/ai/bedrock/role-arn"
+resource "aws_opensearchserverless_security_policy" "encryption" {
 
 
-  type = "String"
+  name = "terraform-rag-encryption"
 
 
-  value = module.bedrock_role.role_arn
+  type = "encryption"
+
+
+
+  policy = jsonencode({
+
+    Rules = [
+
+      {
+
+        Resource = [
+
+          "collection/terraform-rag"
+
+        ]
+
+
+        ResourceType = "collection"
+
+      }
+
+    ]
+
+
+    AWSOwnedKey = true
+
+  })
 
 }
 
 
 
-resource "aws_ssm_parameter" "knowledge_bucket" {
+//==================================================================================
+// OpenSearch Network Policy
+//==================================================================================
+
+resource "aws_opensearchserverless_security_policy" "network" {
 
 
-  name = "/wordpress/ai/knowledge/bucket-name"
+  name = "terraform-rag-network"
 
 
-  type = "String"
+  type = "network"
 
 
-  value = module.knowledge_bucket.bucket_name
+
+  policy = jsonencode([
+
+    {
+
+      Rules = [
+
+        {
+
+          Resource = [
+
+            "collection/terraform-rag"
+
+          ]
+
+
+          ResourceType = "collection"
+
+        }
+
+      ]
+
+
+      AllowFromPublic = true
+
+    }
+
+  ])
+
+}
+
+
+//==================================================================================
+// OpenSearch Access Policy
+//==================================================================================
+
+resource "aws_opensearchserverless_access_policy" "access" {
+
+
+  name = "terraform-rag-access"
+
+
+  type = "data"
+
+
+
+  policy = jsonencode([
+
+    {
+
+      Rules = [
+
+        {
+
+          ResourceType = "collection"
+
+
+          Resource = [
+
+            "collection/terraform-rag"
+
+          ]
+
+
+          Permission = [
+
+            "aoss:*"
+
+          ]
+
+        },
+
+
+        {
+
+          ResourceType = "index"
+
+
+          Resource = [
+
+            "index/terraform-rag/*"
+
+          ]
+
+
+          Permission = [
+
+            "aoss:*"
+
+          ]
+
+        }
+
+      ]
+
+
+      Principal = [
+
+        module.bedrock_role.role_arn
+
+      ]
+
+    }
+
+  ])
+
+}
+
+
+
+//==================================================================================
+// OpenSearch Collection
+//==================================================================================
+
+resource "aws_opensearchserverless_collection" "vector" {
+
+
+  name = "terraform-rag"
+
+
+  type = "VECTORSEARCH"
+
+
+
+  depends_on = [
+
+    aws_opensearchserverless_security_policy.encryption,
+
+    aws_opensearchserverless_security_policy.network
+
+  ]
 
 }
