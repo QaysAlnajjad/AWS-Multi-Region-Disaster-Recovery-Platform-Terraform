@@ -72,16 +72,20 @@ jobs:
   - name: Setup Terraform
 
     uses: hashicorp/setup-terraform@v3
+
+
   
   - name: Load Terraform Config
   
     run: |
   
-      source config.sh
+      source scripts/deployment/config.sh
   
       echo "STATE_BUCKET_NAME=$STATE_BUCKET_NAME" >> $GITHUB_ENV
   
       echo "STATE_BUCKET_REGION=$STATE_BUCKET_REGION" >> $GITHUB_ENV
+
+
 
   - name: Terraform Init
   
