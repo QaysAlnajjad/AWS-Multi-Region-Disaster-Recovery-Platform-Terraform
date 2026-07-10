@@ -1,3 +1,13 @@
+data "terraform_remote_state" "foundation" {
+  backend = "s3"
+  config = {
+    bucket = var.state_bucket_name
+    key    = "environments/ai/foundation/terraform.tfstate"
+    region = var.state_bucket_region
+  }
+}
+
+
 //==================================================================================
 //  Create KW
 //==================================================================================
@@ -6,7 +16,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
   name = "terraform-rag"
 
-  role_arn = module.bedrock_role.role_arn
+  role_arn = data.terraform_remote_state.foundation.outputs.role_arn
 
   knowledge_base_configuration {
 
@@ -50,16 +60,6 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 //==================================================================================
 //  Create Bedrock data source
 //==================================================================================
-
-data "terraform_remote_state" "foundation" {
-  backend = "s3"
-  config = {
-    bucket = var.state_bucket_name
-    key    = "environments/ai/foundation/terraform.tfstate"
-    region = var.state_bucket_region
-  }
-}
-
 
 resource "aws_bedrockagent_data_source" "knowledge" {
 
