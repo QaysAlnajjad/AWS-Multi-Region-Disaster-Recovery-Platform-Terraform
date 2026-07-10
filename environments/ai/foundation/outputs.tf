@@ -1,3 +1,3 @@
 output "bucket_arn" { 
-  value = aws_lb_target_group.wordpress.arn
+  value = module.knowledge_bucket.bucket_arn
 }
