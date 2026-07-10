@@ -95,7 +95,6 @@ response = bedrock.create_knowledge_base(
 
         "opensearchServerlessConfiguration":{
 
-            # سيتم ملؤها فقط عند استخدام custom store
         }
 
     }
