@@ -267,6 +267,36 @@ resource "aws_opensearchserverless_collection" "vector" {
 }
 
 
+resource "null_resource" "create_vector_index" {
+
+
+  triggers = {
+
+
+    collection = aws_opensearchserverless_collection.vector.id
+
+
+  }
+
+
+
+  provisioner "local-exec" {
+
+
+    command = <<EOF
+
+pip install boto3 requests requests-aws4auth
+
+python ../../scripts/ai/create_vector_index.py \
+${aws_opensearchserverless_collection.vector.collection_endpoint}
+
+EOF
+
+  }
+
+
+}
+
 
 //==================================================================================
 // Bedrock Knowledge Base
