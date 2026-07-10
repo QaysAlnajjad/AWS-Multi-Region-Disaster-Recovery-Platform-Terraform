@@ -73,7 +73,7 @@ resource "aws_bedrockagent_data_source" "knowledge" {
 
     s3_configuration {
 
-      bucket_arn = module.knowledge_bucket.bucket_arn
+      bucket_arn = data.terraform_remote_state.foundation.outputs.bucket_arn
 
     }
 
