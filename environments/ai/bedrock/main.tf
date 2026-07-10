@@ -265,3 +265,88 @@ resource "aws_opensearchserverless_collection" "vector" {
   ]
 
 }
+
+
+
+//==================================================================================
+// Bedrock Knowledge Base
+//==================================================================================
+
+
+resource "aws_bedrockagent_knowledge_base" "main" {
+
+
+  name = "terraform-rag"
+
+
+  role_arn = module.bedrock_role.role_arn
+
+
+
+  knowledge_base_configuration {
+
+
+    type = "VECTOR"
+
+
+
+    vector_knowledge_base_configuration {
+
+
+      embedding_model_arn = var.embedding_model_arn
+
+
+    }
+
+
+  }
+
+
+
+  storage_configuration {
+
+
+    type = "OPENSEARCH_SERVERLESS"
+
+
+
+    opensearch_serverless_configuration {
+
+
+      collection_arn = aws_opensearchserverless_collection.vector.arn
+
+
+
+      vector_index_name = "terraform-index"
+
+
+
+      field_mapping {
+
+
+        vector_field = "vector"
+
+
+        text_field = "text"
+
+
+        metadata_field = "metadata"
+
+
+      }
+
+
+    }
+
+
+  }
+
+
+
+  depends_on = [
+
+    null_resource.create_vector_index
+
+  ]
+
+}
