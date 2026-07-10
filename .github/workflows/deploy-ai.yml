@@ -79,7 +79,7 @@ jobs:
   
     run: |
   
-      source scripts/deployment/config.sh
+      source $GITHUB_WORKSPACE/scripts/deployment/config.sh
   
       echo "STATE_BUCKET_NAME=$STATE_BUCKET_NAME" >> $GITHUB_ENV
   
