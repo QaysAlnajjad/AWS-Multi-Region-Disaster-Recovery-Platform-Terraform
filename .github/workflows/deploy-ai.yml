@@ -93,7 +93,8 @@ jobs:
   
       terraform init \
         -backend-config="bucket=${STATE_BUCKET_NAME}" \
-        -backend-config="region=${STATE_BUCKET_REGION}"
+        -backend-config="region=${STATE_BUCKET_REGION}" \
+        -backend-config="key=environments/ai/bedrock/terraform.tfstate"
 
 
   - name: Terraform Apply
