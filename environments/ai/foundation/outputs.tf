@@ -6,6 +6,6 @@ output "bucket_arn" {
   value = module.knowledge_bucket.bucket_arn
 }
 
-output "bucket_arn" { 
+output "collection_arn" { 
   value = module.knowledge_bucket.bucket_arn
 }
