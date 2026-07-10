@@ -263,6 +263,16 @@ resource "aws_opensearchserverless_collection" "vector" {
 
 }
 
+resource "time_sleep" "wait_for_aoss" {
+
+  depends_on = [
+    aws_opensearchserverless_collection.vector,
+    aws_opensearchserverless_access_policy.access
+  ]
+
+  create_duration = "60s"
+}
+
 
 resource "null_resource" "create_vector_index" {
 
