@@ -40,7 +40,7 @@ jobs:
       shell: bash
 
 
-      working-directory: environments/ai
+      working-directory: environments/ai/bedrock
 
 
 
