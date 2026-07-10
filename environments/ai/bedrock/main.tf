@@ -287,7 +287,7 @@ resource "null_resource" "create_vector_index" {
 
 pip install boto3 requests requests-aws4auth
 
-python ../../../scripts/ai/create_vector_index.py \
+python ../../../scripts/ai-review/create_vector_index.py \
 ${aws_opensearchserverless_collection.vector.collection_endpoint}
 
 EOF
