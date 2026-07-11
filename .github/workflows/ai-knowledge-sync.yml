@@ -113,21 +113,49 @@ jobs:
       ##################################################################
 
       - name: Start Ingestion
-
+      
         run: |
-
-          python scripts/ai-review/start_ingestion.py \
-            "${KNOWLEDGE_BASE_ID}" \
-            "${DATA_SOURCE_ID}"
+      
+          JOB_ID=$(
+            aws bedrock-agent start-ingestion-job \
+              --knowledge-base-id "${KNOWLEDGE_BASE_ID}" \
+              --data-source-id "${DATA_SOURCE_ID}" \
+              --query "ingestionJob.ingestionJobId" \
+              --output text
+          )
+      
+          echo "INGESTION_JOB_ID=${JOB_ID}" >> $GITHUB_ENV
 
       ##################################################################
       # Wait For Completion
       ##################################################################
 
       - name: Wait For Completion
-
+      
         run: |
-
-          python scripts/ai-review/wait_ingestion.py \
-            "${KNOWLEDGE_BASE_ID}" \
-            "${DATA_SOURCE_ID}"
+      
+          while true
+          do
+      
+            STATUS=$(
+              aws bedrock-agent get-ingestion-job \
+                --knowledge-base-id "${KNOWLEDGE_BASE_ID}" \
+                --data-source-id "${DATA_SOURCE_ID}" \
+                --ingestion-job-id "${INGESTION_JOB_ID}" \
+                --query "ingestionJob.status" \
+                --output text
+            )
+      
+            echo "Status: ${STATUS}"
+      
+            if [ "${STATUS}" = "COMPLETE" ]; then
+              exit 0
+            fi
+      
+            if [ "${STATUS}" = "FAILED" ]; then
+              exit 1
+            fi
+      
+            sleep 10
+      
+          done
