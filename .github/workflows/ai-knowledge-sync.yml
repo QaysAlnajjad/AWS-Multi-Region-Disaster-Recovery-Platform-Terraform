@@ -8,7 +8,7 @@ on:
 
     paths:
 
-      - "knowledge/**"
+      - "knowledge-base/**"
 
 permissions:
 
@@ -54,17 +54,25 @@ jobs:
       # Load AI Configuration
       ##################################################################
 
-      - name: Upload Knowledge
-
+      - name: Load AI Configuration
+      
         run: |
-
-          source scripts/common/load-ai-config.sh
-
-          aws s3 sync \
-            knowledge/ \
-            s3://${KNOWLEDGE_BUCKET}/ \
-            --delete
-
+      
+          echo "KNOWLEDGE_BASE_ID=$(aws ssm get-parameter \
+            --name /wordpress/ai/knowledge-base/id \
+            --query Parameter.Value \
+            --output text)" >> $GITHUB_ENV
+      
+          echo "DATA_SOURCE_ID=$(aws ssm get-parameter \
+            --name /wordpress/ai/data-source/id \
+            --query Parameter.Value \
+            --output text)" >> $GITHUB_ENV
+      
+          echo "KNOWLEDGE_BUCKET=$(aws ssm get-parameter \
+            --name /wordpress/ai/knowledge-bucket/name \
+            --query Parameter.Value \
+            --output text)" >> $GITHUB_ENV
+      
       ##################################################################
       # Setup Python
       ##################################################################
