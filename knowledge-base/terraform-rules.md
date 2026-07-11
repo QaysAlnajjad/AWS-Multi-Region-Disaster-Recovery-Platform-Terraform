@@ -61,7 +61,8 @@ Rules
 Rules
 
 - Every deployment owns an independent Terraform state.
-- Runtime communication must not depend on Terraform outputs.
+- Terraform deployments exchange values through outputs and terraform_remote_state.
+- Runtime components exchange values through AWS Systems Manager Parameter Store.
 
 ---
 
