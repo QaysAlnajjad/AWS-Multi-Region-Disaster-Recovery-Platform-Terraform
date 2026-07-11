@@ -55,24 +55,37 @@ jobs:
       ##################################################################
 
       - name: Load AI Configuration
-      
+
         run: |
-      
+
           echo "KNOWLEDGE_BASE_ID=$(aws ssm get-parameter \
             --name /wordpress/ai/knowledge-base/id \
             --query Parameter.Value \
             --output text)" >> $GITHUB_ENV
-      
+
           echo "DATA_SOURCE_ID=$(aws ssm get-parameter \
             --name /wordpress/ai/data-source/id \
             --query Parameter.Value \
             --output text)" >> $GITHUB_ENV
-      
+
           echo "KNOWLEDGE_BUCKET=$(aws ssm get-parameter \
             --name /wordpress/ai/knowledge-bucket/name \
             --query Parameter.Value \
             --output text)" >> $GITHUB_ENV
-      
+
+      ##################################################################
+      # Upload Knowledge Base
+      ##################################################################
+
+      - name: Upload Knowledge Base
+
+        run: |
+
+          aws s3 sync \
+            knowledge-base/ \
+            s3://${KNOWLEDGE_BUCKET}/ \
+            --delete
+
       ##################################################################
       # Setup Python
       ##################################################################
@@ -103,8 +116,6 @@ jobs:
 
         run: |
 
-          source scripts/common/load-ai-config.sh
-
           python scripts/ai-review/start_ingestion.py \
             "${KNOWLEDGE_BASE_ID}" \
             "${DATA_SOURCE_ID}"
@@ -117,4 +128,6 @@ jobs:
 
         run: |
 
-          python scripts/ai-review/wait_ingestion.py
+          python scripts/ai-review/wait_ingestion.py \
+            "${KNOWLEDGE_BASE_ID}" \
+            "${DATA_SOURCE_ID}"
