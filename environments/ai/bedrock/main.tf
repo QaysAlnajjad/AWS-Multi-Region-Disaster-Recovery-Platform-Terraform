@@ -281,8 +281,6 @@ resource "null_resource" "vector_index" {
 
     command = <<EOF
 
-    pip install boto3 requests requests-aws4auth
-
 python ../../../scripts/ai-review/create_vector_index.py \
 ${self.triggers.endpoint}
 EOF
