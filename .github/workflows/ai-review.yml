@@ -123,35 +123,35 @@ jobs:
       # Terraform Format Check
       ##################################################################
 
-      - name: Terraform Format Check
-
+      - name: Terraform Format
+        id: fmt
+        continue-on-error: true
         run: |
-
-          terraform fmt -check -recursive
+          terraform fmt -check -recursive > ai-results/fmt.txt 2>&1
 
       ##################################################################
       # Terraform Validate
       ##################################################################
 
       - name: Terraform Validation
+        id: validate
+        continue-on-error: true
 
         run: |
 
           chmod +x scripts/deployment/terraform-validate.sh
 
-          ./scripts/deployment/terraform-validate.sh
+          ./scripts/deployment/terraform-validate.sh > ai-results/validate.txt 2>&1
 
       ##################################################################
       # Trivy
       ##################################################################
 
-      - name: Run Trivy
-
+      - name: TFLint
+        id: tflint
+        continue-on-error: true
         run: |
-
-          trivy config environments \
-            --format json \
-            --output ai-results/trivy.json
+          tflint > tflint.txt 2>&1
 
       ##################################################################
       # Checkov
