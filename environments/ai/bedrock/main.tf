@@ -247,13 +247,9 @@ resource "aws_opensearchserverless_access_policy" "access" {
 
 resource "aws_opensearchserverless_collection" "vector" {
 
-
   name = "terraform-rag"
 
-
   type = "VECTORSEARCH"
-
-
 
   depends_on = [
 
@@ -275,52 +271,26 @@ resource "time_sleep" "wait_for_aoss" {
   create_duration = "60s"
 }
 
-
-resource "null_resource" "create_vector_index" {
-
-
-  triggers = {
-
-
-    collection = aws_opensearchserverless_collection.vector.id
-
-
-  }
-
-
-
-  provisioner "local-exec" {
-
-
-    command = <<EOF
-
-pip install boto3 requests requests-aws4auth
-
-python ../../../scripts/ai-review/create_vector_index.py \
-${aws_opensearchserverless_collection.vector.collection_endpoint}
-
-EOF
-
-  }
-
-
-}
-
-
-
-resource "null_resource" "delete_vector_index" {
+resource "null_resource" "vector_index" {
 
   triggers = {
     endpoint = aws_opensearchserverless_collection.vector.collection_endpoint
   }
 
   provisioner "local-exec" {
+
+    command = <<EOF
+python create_vector_index.py \
+${self.triggers.endpoint}
+EOF
+  }
+
+  provisioner "local-exec" {
+
     when = destroy
 
     command = <<EOF
-pip install boto3 requests requests-aws4auth
-
-python ../../../scripts/ai-review/delete_vector_index.py \
+python delete_vector_index.py \
 ${self.triggers.endpoint}
 EOF
   }
