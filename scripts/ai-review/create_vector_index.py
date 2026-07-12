@@ -73,7 +73,7 @@ body = {
 
                     "engine": "faiss",
 
-                    "space_type": "l2"
+                    "space_type": "cosinesimil"
 
                 }
 
