@@ -426,7 +426,7 @@ resource "aws_ssm_parameter" "data_source_id" {
 
   type  = "String"
 
-  value = aws_bedrockagent_data_source.main.id
+  value = aws_bedrockagent_data_source.main.data_source_id
 }
 
 resource "aws_ssm_parameter" "knowledge_bucket" {
