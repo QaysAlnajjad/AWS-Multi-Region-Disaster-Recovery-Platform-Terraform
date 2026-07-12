@@ -84,6 +84,16 @@ jobs:
       echo "TF_STATE_BUCKET_NAME=$TF_STATE_BUCKET_NAME" >> $GITHUB_ENV
   
       echo "TF_STATE_BUCKET_REGION=$TF_STATE_BUCKET_REGION" >> $GITHUB_ENV
+    
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.12"
+    
+  - name: Install Python Dependencies
+    run: |
+      pip install boto3 requests requests-aws4auth
+
 
   
   - name: Terraform Init
