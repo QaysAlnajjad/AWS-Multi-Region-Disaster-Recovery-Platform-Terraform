@@ -404,15 +404,6 @@ resource "aws_ssm_parameter" "knowledge_base_id" {
   value = aws_bedrockagent_knowledge_base.main.id
 }
 
-resource "aws_ssm_parameter" "data_source_id" {
-
-  name  = "/wordpress/ai/data-source/id"
-
-  type  = "String"
-
-  value = aws_bedrockagent_data_source.main.id
-}
-
 resource "aws_ssm_parameter" "knowledge_bucket" {
 
   name  = "/wordpress/ai/knowledge-bucket/name"
