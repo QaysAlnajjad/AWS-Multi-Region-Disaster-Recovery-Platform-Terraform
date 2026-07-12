@@ -374,7 +374,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
   depends_on = [
 
-    null_resource.create_vector_index
+    null_resource.vector_index
 
   ]
 
