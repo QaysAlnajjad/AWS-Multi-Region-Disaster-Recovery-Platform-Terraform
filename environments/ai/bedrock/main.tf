@@ -280,7 +280,7 @@ resource "null_resource" "vector_index" {
   provisioner "local-exec" {
 
     command = <<EOF
-python create_vector_index.py \
+python ../../../scripts/ai-review/create_vector_index.py \
 ${self.triggers.endpoint}
 EOF
   }
@@ -290,7 +290,7 @@ EOF
     when = destroy
 
     command = <<EOF
-python delete_vector_index.py \
+python ../../../scripts/ai-review/delete_vector_index.py \
 ${self.triggers.endpoint}
 EOF
   }
