@@ -35,7 +35,9 @@ module "bedrock_role" {
 
         "s3:ListBucket",
 
-        "aoss:*"
+        "aoss:*",
+
+        "bedrock:InvokeModel"
 
       ]
 
