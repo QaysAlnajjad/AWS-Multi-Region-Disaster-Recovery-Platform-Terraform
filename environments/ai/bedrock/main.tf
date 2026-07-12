@@ -307,6 +307,26 @@ EOF
 }
 
 
+
+resource "null_resource" "delete_vector_index" {
+
+  triggers = {
+    endpoint = aws_opensearchserverless_collection.vector.collection_endpoint
+  }
+
+  provisioner "local-exec" {
+    when = destroy
+
+    command = <<EOF
+pip install boto3 requests requests-aws4auth
+
+python ../../../scripts/ai-review/delete_vector_index.py \
+${self.triggers.endpoint}
+EOF
+  }
+}
+
+
 //==================================================================================
 // Bedrock Knowledge Base
 //==================================================================================
