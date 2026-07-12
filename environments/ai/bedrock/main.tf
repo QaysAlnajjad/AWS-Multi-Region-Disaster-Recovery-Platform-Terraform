@@ -392,6 +392,31 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 
 
 //==================================================================================
+// Bedrock Data Source
+//==================================================================================
+
+resource "aws_bedrockagent_data_source" "main" {
+
+  knowledge_base_id = aws_bedrockagent_knowledge_base.main.id
+
+  name = "terraform-documents"
+
+  data_source_configuration {
+
+    type = "S3"
+
+    s3_configuration {
+
+      bucket_arn = module.knowledge_bucket.bucket_arn
+
+    }
+
+  }
+
+}
+
+
+//==================================================================================
 // SSM Parameters
 //==================================================================================
 
@@ -402,6 +427,15 @@ resource "aws_ssm_parameter" "knowledge_base_id" {
   type  = "String"
 
   value = aws_bedrockagent_knowledge_base.main.id
+}
+
+resource "aws_ssm_parameter" "data_source_id" {
+
+  name  = "/wordpress/ai/data-source/id"
+
+  type  = "String"
+
+  value = aws_bedrockagent_data_source.main.id
 }
 
 resource "aws_ssm_parameter" "knowledge_bucket" {
