@@ -151,7 +151,7 @@ jobs:
         id: tflint
         continue-on-error: true
         run: |
-          tflint --recursive 2> ai-results/tflint.txt 
+          tflint --recursive --format=json 2> ai-results/tflint.txt 
 
       ##################################################################
       # Checkov
@@ -162,7 +162,7 @@ jobs:
         run: |
           checkov \
             -d environments \
-            -o json 2> ai-results/checkov.json
+            -o json --compact --quiet 2> ai-results/checkov.json
 
       ##################################################################
       # Create Review Input
