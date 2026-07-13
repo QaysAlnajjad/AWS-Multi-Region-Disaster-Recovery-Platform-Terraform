@@ -127,7 +127,7 @@ jobs:
         id: fmt
         continue-on-error: true
         run: |
-          terraform fmt -check -recursive > ai-results/fmt.txt 2>&1
+          terraform fmt -check -recursive 2> ai-results/fmt.txt
 
       ##################################################################
       # Terraform Validate
@@ -141,7 +141,7 @@ jobs:
 
           chmod +x scripts/deployment/terraform-validation.sh
 
-          ./scripts/deployment/terraform-validation.sh > ai-results/validation.txt 2>&1
+          ./scripts/deployment/terraform-validation.sh 2> ai-results/validation.txt 
       
       ##################################################################
       # Run TFLint
@@ -151,7 +151,7 @@ jobs:
         id: tflint
         continue-on-error: true
         run: |
-          tflint --recursive > ai-results/tflint.txt 2>&1
+          tflint --recursive 2> ai-results/tflint.txt 
 
       ##################################################################
       # Checkov
@@ -162,8 +162,7 @@ jobs:
         run: |
           checkov \
             -d environments \
-            -o json \
-            > ai-results/checkov.json
+            -o json 2> ai-results/checkov.json
 
       ##################################################################
       # Create Review Input
