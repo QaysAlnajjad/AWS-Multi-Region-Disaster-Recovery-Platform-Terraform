@@ -59,16 +59,6 @@ jobs:
           python-version: "3.12"
 
       ##################################################################
-      # Install Python Dependencies
-      ##################################################################
-
-      - name: Install Python Dependencies
-
-        run: |
-
-          pip install boto3
-
-      ##################################################################
       # Setup Terraform
       ##################################################################
 
@@ -141,17 +131,17 @@ jobs:
 
           chmod +x scripts/deployment/terraform-validation.sh
 
-          ./scripts/deployment/terraform-validate.sh > ai-results/validate.txt 2>&1
+          ./scripts/deployment/terraform-validation.sh > ai-results/validation.txt 2>&1
 
       ##################################################################
-      # Trivy
+      # TFLint
       ##################################################################
 
       - name: TFLint
         id: tflint
         continue-on-error: true
         run: |
-          tflint > tflint.txt 2>&1
+          tflint > ai-results/tflint.txt 2>&1
 
       ##################################################################
       # Checkov
