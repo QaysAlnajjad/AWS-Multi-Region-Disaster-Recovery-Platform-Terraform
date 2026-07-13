@@ -157,13 +157,13 @@ response = bedrock.invoke_model(
 # Parse Response
 ################################################################################
 
-response_body = json.loads(
+raw = response["body"].read()
 
-    response["body"].read()
+print("RAW RESPONSE:")
+print(raw)
+print(raw.decode("utf-8", errors="ignore"))
 
-)
-
-response_body = json.loads(response["body"].read())
+response_body = json.loads(raw)
 
 print(json.dumps(response_body, indent=2))
 answer = response_body["content"][0]["text"]
