@@ -88,6 +88,16 @@ jobs:
           sudo apt-get update
 
           sudo apt-get install -y trivy
+      
+      ##################################################################
+      # Setup TFLint
+      ##################################################################
+      
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+      
+      - name: Check TFLint Version
+        run: tflint --version       
 
       ##################################################################
       # Install Checkov
@@ -132,16 +142,16 @@ jobs:
           chmod +x scripts/deployment/terraform-validation.sh
 
           ./scripts/deployment/terraform-validation.sh > ai-results/validation.txt 2>&1
-
+      
       ##################################################################
-      # TFLint
+      # Run TFLint
       ##################################################################
-
-      - name: TFLint
+      
+      - name: Run TFLint
         id: tflint
         continue-on-error: true
         run: |
-          tflint > ai-results/tflint.txt 2>&1
+          tflint --recursive > ai-results/tflint.txt 2>&1
 
       ##################################################################
       # Checkov
