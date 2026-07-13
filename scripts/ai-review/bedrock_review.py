@@ -163,7 +163,9 @@ response_body = json.loads(
 
 )
 
+response_body = json.loads(response["body"].read())
 
+print(json.dumps(response_body, indent=2))
 answer = response_body["content"][0]["text"]
 
 
