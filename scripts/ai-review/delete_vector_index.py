@@ -11,6 +11,13 @@ region = "us-east-1"
 session = boto3.Session()
 credentials = session.get_credentials()
 
+
+sts = boto3.client("sts")
+
+print(sts.get_caller_identity())
+
+
+
 auth = AWS4Auth(
     credentials.access_key,
     credentials.secret_key,
