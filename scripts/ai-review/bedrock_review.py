@@ -107,80 +107,62 @@ prompt = build_prompt(
 
 )
 
-
 ################################################################################
-# Invoke Claude
+# Converse API
 ################################################################################
 
-response = bedrock.invoke_model(
+response = bedrock.converse(
 
-    modelId="nvidia.nemotron-nano-12b-v2",           
+    modelId="nvidia.nemotron-nano-12b-v2",
 
-    contentType="application/json",
+    inferenceConfig={
 
-    accept="application/json",
+        "maxTokens": 4096,
 
-    body=json.dumps({
+        "temperature": 0
 
-        "anthropic_version": "bedrock-2023-05-31",
+    },
 
-        "max_tokens": 4096,
+    messages=[
 
-        "messages": [
+        {
 
-            {
+            "role": "user",
 
-                "role": "user",
+            "content": [
 
-                "content": [
+                {
 
-                    {
+                    "text": prompt
 
-                        "type": "text",
+                }
 
-                        "text": prompt
+            ]
 
-                    }
+        }
 
-                ]
-
-            }
-
-        ]
-
-    })
+    ]
 
 )
+
 
 
 ################################################################################
 # Parse Response
 ################################################################################
 
-raw = response["body"].read()
+print(json.dumps(response, indent=2, default=str))
 
-print("RAW RESPONSE:")
-print(raw)
-print(raw.decode("utf-8", errors="ignore"))
-
-response_body = json.loads(raw)
-
-print(json.dumps(response_body, indent=2))
-answer = response_body["content"][0]["text"]
-
+answer = response["output"]["message"]["content"][0]["text"]
 
 try:
-
     result = json.loads(answer)
 
-
 except Exception:
-
     result = {
-
         "raw_response": answer
-
     }
+
 
 
 ################################################################################
