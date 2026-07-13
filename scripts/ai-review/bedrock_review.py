@@ -49,27 +49,13 @@ with open(input_file, "r", encoding="utf-8") as f:
 ################################################################################
 
 query = """
-AWS Terraform best practices
-
-AWS Well Architected Framework
-
-Terraform security
-
-IAM least privilege
-
-Networking security
-
-High availability
-
-Disaster recovery
-
-Encryption
-
-Secrets management
-
-Logging and monitoring
-
-Cost optimization
+Project architecture
+Repository standards
+Infrastructure conventions
+Terraform module structure
+Naming conventions
+Review rules
+Deployment architecture
 """
 
 
