@@ -385,6 +385,8 @@ resource "aws_bedrockagent_data_source" "main" {
 
   name = "terraform-documents"
 
+  data_deletion_policy = "RETAIN"
+
   data_source_configuration {
 
     type = "S3"
