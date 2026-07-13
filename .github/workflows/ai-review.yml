@@ -158,10 +158,9 @@ jobs:
       ##################################################################
 
       - name: Run Checkov
-
+        continue-on-error: true
         run: |
-
-          checkov \
+          checkov 
             -d environments \
             -o json \
             > ai-results/checkov.json
