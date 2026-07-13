@@ -128,7 +128,7 @@ prompt = build_prompt(
 
 response = bedrock.invoke_model(
 
-    modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
+    modelId="nvidia.nemotron-nano-12b-v2",           
 
     contentType="application/json",
 
