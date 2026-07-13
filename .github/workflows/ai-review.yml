@@ -175,6 +175,21 @@ jobs:
 
           python scripts/ai-review/review_create_input.py
 
+
+      ##################################################################
+      # Load AI Configuration
+      ##################################################################
+      
+      - name: Load AI Configuration
+      
+        run: |
+      
+          echo "KNOWLEDGE_BASE_ID=$(aws ssm get-parameter \
+            --name /wordpress/ai/knowledge-base/id \
+            --query 'Parameter.Value' \
+            --output text)" >> "$GITHUB_ENV"
+      
+            
       ##################################################################
       # Bedrock AI Review
       ##################################################################
@@ -182,8 +197,6 @@ jobs:
       - name: Run Bedrock Review
 
         run: |
-
-          source scripts/common/load-ai-config.sh
 
           python scripts/ai-review/bedrock_review.py \
             ai-results/review_input.json \
