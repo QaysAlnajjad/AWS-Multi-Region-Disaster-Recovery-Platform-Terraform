@@ -139,7 +139,7 @@ jobs:
 
         run: |
 
-          chmod +x scripts/deployment/terraform-validate.sh
+          chmod +x scripts/deployment/terraform-validation.sh
 
           ./scripts/deployment/terraform-validate.sh > ai-results/validate.txt 2>&1
 
