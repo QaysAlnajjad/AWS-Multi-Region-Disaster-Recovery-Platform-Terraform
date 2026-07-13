@@ -288,15 +288,6 @@ ${self.triggers.endpoint}
 EOF
   }
 
-  provisioner "local-exec" {
-
-    when = destroy
-
-    command = <<EOF
-python ../../../scripts/ai-review/delete_vector_index.py \
-${self.triggers.endpoint}
-EOF
-  }
 }
 
 
