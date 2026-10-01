@@ -217,7 +217,147 @@ Covers:
 ---
 
 > 🔐 **Security Note**  
-> All demos were recorded using a sandbox AWS account with GitHub Actions OIDC authentication.  
+> All demos were recorded using a sandbox AWS account with GitHub Actions OIDC authenticati
+Skip to content
+Navigation Menu
+
+    Platform
+    Solutions
+    Resources
+    Open Source
+    Enterprise
+    Pricing
+
+QaysAlnajjad /
+EKS-Infrastructure-Platform-Terraform-AWS
+Public
+
+    Code
+    Issues
+    Pull requests
+    Actions
+    Projects
+    Security and quality
+    Insights
+
+Files
+
+    .github
+    bootstrap
+    scripts
+    .gitignore
+    Project_Diagram.pdf
+    README.md
+    RUNBOOR.md
+    alb-controller-policy.json
+    backend.tf
+    eks.tf
+    iam.tf
+    node-group.tf
+    outputs.tf
+    providers.tf
+    terraform.tfvars
+    variables.tf
+    vpc.tf
+
+    EKS-Infrastructure-Platform-Terraform-AWS
+
+/RUNBOOR.md
+QaysAlnajjad
+QaysAlnajjad
+Clarify ArgoCD permissions in notes section
+aeef235
+ · 
+7 months ago
+
+    Preview
+    Code
+    Blame
+
+93 lines (54 loc) · 3.21 KB
+Infrastructure Bootstrap Runbook
+Purpose
+
+This document defines the security model, access boundaries, and bootstrap procedures for the Kubernetes platform infrastructure on AWS.
+
+It focuses on the initial provisioning phase of the platform, where infrastructure components, access controls, and GitOps foundations are established.
+
+The goal is to provide a clear and controlled approach to:
+
+    Infrastructure provisioning using Terraform
+    Secure access configuration via AWS IAM and Kubernetes RBAC
+    Initial cluster bootstrap, including ArgoCD installation
+    Establishing privilege boundaries between bootstrap and day-2 operations
+
+This runbook intentionally separates infrastructure bootstrap responsibilities from ongoing operational workflows. It reflects a production-oriented model where:
+
+    Infrastructure (platform) concerns are handled with elevated privileges during controlled bootstrap phases
+    Continuous deployment and application management are delegated to GitOps workflows with restricted access
+
+This ensures a balance between operational safety, security, and maintainability of the platform.
+Security & Access Model
+
+IAM → Kubernetes Authorization
+
+    AWS IAM roles mapped via aws-auth ConfigMap
+
+    Kubernetes RBAC enforces authorization
+
+    No static AWS credentials used anywhere
+
+Access Model
+
+    deploy-infra workflow uses the IAM role kubernetes-ci-infra-role, mapped through aws-auth to system:masters, to perform initial cluster bootstrap tasks.
+    eks-node-role is mapped to allow worker nodes to join and operate in the cluster.
+    admin-cli provides manual administrative access for break-glass or operational debugging.
+    ArgoCD permissions are not defined through aws-auth; they are granted through Kubernetes service accounts and RBAC inside the cluster
+
+Notes:
+
+    ArgoCD may require cluster-scoped permissions (via Kubernetes RBAC) to manage resources such as CRDs and controllers. These permissions are separate from AWS IAM and are defined within the cluster.
+    ArgoCD RBAC resources (ServiceAccounts, ClusterRoles, and ClusterRoleBindings) are automatically created by the ArgoCD Helm chart during installation.
+
+Bootstrap and Privilege Boundaries
+
+deploy-infra is responsible for initial cluster provisioning and bootstrap tasks such as:
+
+    provisioning AWS and EKS infrastructure
+    updating kubeconfig
+    applying aws-auth
+    installing ArgoCD
+    creating the root ArgoCD application
+
+After bootstrap, ArgoCD takes over reconciliation of platform and application resources from the GitOps repository.
+
+Some of those GitOps-managed resources may be cluster-scoped, such as:
+
+    CRDs
+    ClusterRoles / ClusterRoleBindings
+    controllers
+    monitoring stack components
+
+Because of that, elevated Kubernetes permissions are required not only during bootstrap, but also for the GitOps control plane when managing cluster-scoped resources.
+Cost Awareness
+
+Key cost drivers:
+
+    NAT Gateway
+
+    EC2 worker nodes
+
+    Load Balancer (ALB)
+
+Cost optimizations (production considerations):
+
+    Spot instances for node groups
+
+    Cluster Autoscaler
+
+    Reducing NAT Gateway usage
+
+    Offloading metrics storage to long-term solutions (e.g. Thanos)
+
+on.  
 > No static AWS credentials, secrets, or IAM users were used or exposed.  
 > All IAM roles, infrastructure, and credentials used during recording were destroyed immediately after the demos.
 
@@ -662,7 +802,7 @@ If you don’t provide them, the infrastructure will create them automatically.
 
 No fork needed:
 ```bash
-git clone https://github.com/QaysAlnajjad/aws-multi-region-wordpress-dr.git
+git clone https://github.com/QaysAlnajjad/AWS-Multi-Region-Disaster-Recovery-Platform-Terraform.git
 cd aws-multi-region-wordpress-dr
 ```
 
