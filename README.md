@@ -1,9 +1,9 @@
 # 🚀 AWS Multi-Region Disaster Recovery Platform (Terraform)
 
 
-[![Deploy Multi-Region Infrastructure](https://github.com/QaysAlnajjad/aws-multi-region-wordpress-dr/actions/workflows/deploy.yml/badge.svg)](https://github.com/QaysAlnajjad/aws-multi-region-wordpress-dr/actions/workflows/deploy.yml)
+[![Deploy Multi-Region Infrastructure](https://github.com/QaysAlnajjad/AWS-Multi-Region-Disaster-Recovery-Platform-Terraform/actions/workflows/deploy.yml/badge.svg)](https://github.com/QaysAlnajjad/aws-multi-region-wordpress-dr/actions/workflows/deploy.yml)
 
-[![Destroy Multi-Region Infrastructure](https://github.com/QaysAlnajjad/aws-multi-region-wordpress-dr/actions/workflows/destroy.yml/badge.svg)](https://github.com/QaysAlnajjad/aws-multi-region-wordpress-dr/actions/workflows/destroy.yml)
+[![Destroy Multi-Region Infrastructure](https://github.com/QaysAlnajjad/AWS-Multi-Region-Disaster-Recovery-Platform-Terraform/actions/workflows/destroy.yml/badge.svg)](https://github.com/QaysAlnajjad/aws-multi-region-wordpress-dr/actions/workflows/destroy.yml)
 
 
 This project provisions a production-style WordPress infrastructure on AWS with multi-region disaster recovery (DR) using Terraform.
