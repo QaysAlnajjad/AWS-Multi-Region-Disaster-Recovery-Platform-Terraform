@@ -803,7 +803,7 @@ If you don’t provide them, the infrastructure will create them automatically.
 No fork needed:
 ```bash
 git clone https://github.com/QaysAlnajjad/AWS-Multi-Region-Disaster-Recovery-Platform-Terraform.git
-cd aws-multi-region-wordpress-dr
+cd AWS-Multi-Region-Disaster-Recovery-Platform-Terraform
 ```
 
 ## 🟦 3. Deploy the Bootstrap Stack (ONE TIME ONLY)
